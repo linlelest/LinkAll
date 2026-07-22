@@ -234,7 +234,7 @@
                 </div>
               </div>
               <div class="task-status">
-                <span class="status-tag" class:{task.status}>{t(statusKey(task.status))}</span>
+                <span class="status-tag {task.status}">{t(statusKey(task.status))}</span>
                 <span class="mono">{Math.round(task.progress * 100)}%</span>
               </div>
               <div class="task-actions">
