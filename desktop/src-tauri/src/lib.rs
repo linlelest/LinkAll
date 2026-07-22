@@ -13,8 +13,6 @@ mod privacy;
 mod tray;
 mod webrtc;
 
-use std::sync::Arc;
-
 use tauri::{Emitter, Manager};
 use tokio::sync::mpsc;
 
@@ -42,10 +40,12 @@ pub fn run() {
             // 初始化守护进程状态
             // new() 即使初始化失败也返回可用的 DaemonState（init_error 记录错误）
             // 确保 Tauri 的 app.manage() 总能注册成功，命令调用时返回友好错误
-            let daemon_state = Arc::new(DaemonState::new(event_tx));
+            // 注意：必须 manage(DaemonState) 而非 manage(Arc<DaemonState>)，
+            // 因为命令参数是 State<'_, DaemonState>
+            let daemon_state = DaemonState::new(event_tx);
 
-            // 注册 Tauri 托管状态
-            app.manage(daemon_state.clone());
+            // 注册 Tauri 托管状态（Tauri 内部会用 RwLock 包裹）
+            app.manage(daemon_state);
 
             // 初始化系统托盘
             if let Err(e) = tray::init_tray(app.handle()) {
