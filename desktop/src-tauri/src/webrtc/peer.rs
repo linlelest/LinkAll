@@ -335,9 +335,10 @@ fn bind_pc_handlers(
             RTCPeerConnectionState::Failed => Some(PeerEvent::Failed("peer connection failed".into())),
             _ => None,
         };
+        let tx = tx1.clone();
         Box::pin(async move {
             if let Some(evt) = evt {
-                let _ = tx1.send(evt);
+                let _ = tx.send(evt);
             }
         })
     }));
@@ -350,9 +351,10 @@ fn bind_pc_handlers(
             RTCIceConnectionState::Disconnected | RTCIceConnectionState::Failed => Some(PeerEvent::IceDisconnected),
             _ => None,
         };
+        let tx = tx2.clone();
         Box::pin(async move {
             if let Some(evt) = evt {
-                let _ = tx2.send(evt);
+                let _ = tx.send(evt);
             }
         })
     }));

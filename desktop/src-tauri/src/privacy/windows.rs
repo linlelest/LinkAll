@@ -2,7 +2,7 @@
 // 覆盖窗口使用 WS_EX_TOPMOST，黑色画刷（BLACK_BRUSH），铺满屏幕。
 use anyhow::{Context, Result};
 use windows::core::w;
-use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
+use windows::Win32::Foundation::{HWND, HINSTANCE, LPARAM, LRESULT, WPARAM};
 use windows::Win32::Graphics::Gdi::{
     BeginPaint, EndPaint, GetStockObject, BLACK_BRUSH, HBRUSH, PAINTSTRUCT,
 };
@@ -14,7 +14,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     SetWindowPos, ShowWindow, CS_HREDRAW, CS_VREDRAW, HWND_TOPMOST, SM_CXSCREEN, SM_CYSCREEN,
     SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SW_SHOWNORMAL, WNDCLASSEXW,
     WM_ERASEBKGND, WM_PAINT,
-    WINDOW_EX_STYLE, WINDOW_STYLE, WS_EX_TOPMOST, WS_POPUP, WS_VISIBLE,
+    WINDOW_EX_STYLE, WS_EX_TOPMOST, WS_POPUP, WS_VISIBLE,
 };
 
 use super::PrivacyScreen;
@@ -75,7 +75,7 @@ impl WindowsPrivacy {
                 h,
                 None,
                 None,
-                Default::default(),
+                HINSTANCE::default(),
                 None,
             )
         }
