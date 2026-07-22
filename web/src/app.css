@@ -1,0 +1,229 @@
+/* 全局样式 + Tailwind v4 主题。
+   遵循"绝对轻量化原则"：去除所有动画过渡，使用原生控件或极简 CSS。
+   深色为主，状态色：绿=在线 / 灰=离线 / 红=忙。 */
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #16162a;
+  --color-bg-soft: #1a1a2e;
+  --color-bg-elev: #20203a;
+  --color-bg-elev2: #2a2a44;
+  --color-border: #34344f;
+  --color-border-soft: #2a2a44;
+  --color-fg: #e6e6f0;
+  --color-fg-muted: #9a9ab5;
+  --color-fg-dim: #6a6a85;
+  --color-accent: #5ac8fa;
+  --color-accent-soft: #3a8aba;
+  --color-online: #34d399;
+  --color-offline: #6a6a85;
+  --color-busy: #f87171;
+  --color-warn: #fbbf24;
+
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Consolas', ui-monospace, monospace;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+/* 去除所有动画过渡（设计方案要求） */
+*,
+*::before,
+*::after {
+  animation-duration: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+}
+
+/* 滚动条极简化 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fg-dim);
+}
+
+/* 选中态 */
+::selection {
+  background: var(--color-accent-soft);
+  color: #fff;
+}
+
+/* 输入控件基础样式 */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: none;
+}
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: none;
+}
+
+/* 隐藏滚动条但保留滚动 */
+.scroll-hidden {
+  scrollbar-width: none;
+}
+.scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* 等宽技术数据字体（设备编号、延迟等） */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* 卡片基础 */
+.card {
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-border-soft);
+  border-radius: 8px;
+}
+
+/* 按钮基础 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elev);
+  color: var(--color-fg);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+.btn:hover:not(:disabled) {
+  background: var(--color-bg-elev2);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #0b0b1a;
+  font-weight: 600;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #6fd4ff;
+}
+.btn-danger {
+  background: var(--color-busy);
+  border-color: var(--color-busy);
+  color: #1a0808;
+  font-weight: 600;
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--color-bg-elev2);
+}
+
+/* 输入框基础 */
+.input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-soft);
+  color: var(--color-fg);
+  outline: none;
+}
+.input:focus {
+  border-color: var(--color-accent);
+}
+.input::placeholder {
+  color: var(--color-fg-dim);
+}
+
+/* 标签 */
+.label {
+  display: block;
+  font-size: 12px;
+  color: var(--color-fg-muted);
+  margin-bottom: 4px;
+}
+
+/* 工具类 */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.mono {
+  font-family: var(--font-mono);
+}
+.muted {
+  color: var(--color-fg-muted);
+}
+.dim {
+  color: var(--color-fg-dim);
+}
