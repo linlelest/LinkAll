@@ -2,9 +2,20 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],
+  resolve: {
+    // 路径别名（与 tsconfig.json paths 对齐）
+    alias: {
+      $lib: fileURLToPath(new URL('./src/lib', import.meta.url)),
+      $components: fileURLToPath(new URL('./src/components', import.meta.url)),
+      $routes: fileURLToPath(new URL('./src/routes', import.meta.url)),
+    },
+    // 允许省略 .svelte.ts / .svelte.js 扩展名（Svelte 5 runes 模块）
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.svelte', '.svelte.ts', '.svelte.js'],
+  },
   build: {
     target: 'es2022',
     cssCodeSplit: false,
