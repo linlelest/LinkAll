@@ -5,7 +5,9 @@
 // Linux：xset 禁用屏保 + 顶层 X11 覆盖窗口（动态加载 libX11）
 use anyhow::Result;
 
+#[cfg(target_os = "windows")]
 pub mod windows;
+#[cfg(target_os = "linux")]
 pub mod linux;
 
 /// 防窥屏控制器 trait

@@ -3,7 +3,9 @@
 // 协议键码采用 JS KeyboardEvent.key 命名（与 shared/protocol.json KeyCode 一致）。
 use anyhow::Result;
 
+#[cfg(target_os = "windows")]
 pub mod windows;
+#[cfg(target_os = "linux")]
 pub mod linux;
 
 /// 平台键码：Windows 扫描码（Set 1 Make Code）+ Linux input-event-codes（KEY_*）

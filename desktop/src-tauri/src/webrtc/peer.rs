@@ -10,7 +10,7 @@ use tokio::sync::{mpsc, oneshot, Mutex};
 use webrtc::api::interceptor_registry::register_default_interceptors;
 use webrtc::api::media_engine::{MediaEngine, MIME_TYPE_H264};
 use webrtc::api::APIBuilder;
-use webrtc::ice::candidate::Candidate;
+use webrtc::ice_transport::ice_candidate::RTCIceCandidateInit;
 use webrtc::interceptor::registry::Registry;
 use webrtc::media::Sample;
 use webrtc::peer_connection::configuration::RTCConfiguration;
@@ -50,7 +50,7 @@ pub struct PeerSession {
     /// 接收编码帧的入口（编码线程 → 此处 → 写入轨道）
     frame_tx: mpsc::Sender<EncodedFrame>,
     /// 本地 ICE 候选出口（PC 回调 → run 循环 → 信令发送）
-    ice_tx: mpsc::UnboundedSender<webrtc::ice::candidate::ICECandidateInit>,
+    ice_tx: mpsc::UnboundedSender<RTCIceCandidateInit>,
     /// 关闭信号
     shutdown: Mutex<Option<oneshot::Sender<()>>>,
 }
@@ -108,7 +108,7 @@ impl PeerSession {
         let control = Arc::new(ControlDispatcher::new(dc_arc.clone(), settings, frame_rx));
 
         // 6) ICE 候选通道
-        let (ice_tx, ice_rx) = mpsc::unbounded_channel::<webrtc::ice::candidate::ICECandidateInit>();
+        let (ice_tx, ice_rx) = mpsc::unbounded_channel::<RTCIceCandidateInit>();
 
         // 7) 事件出口
         let (event_tx, event_rx) = mpsc::unbounded_channel::<PeerEvent>();
@@ -177,7 +177,7 @@ impl PeerSession {
 async fn run_loop(
     session: Arc<PeerSession>,
     mut sig_rx: mpsc::UnboundedReceiver<SignalingEvent>,
-    mut ice_rx: mpsc::UnboundedReceiver<webrtc::ice::candidate::ICECandidateInit>,
+    mut ice_rx: mpsc::UnboundedReceiver<RTCIceCandidateInit>,
     mut frame_rx: mpsc::Receiver<EncodedFrame>,
     event_tx: mpsc::UnboundedSender<PeerEvent>,
     signaling: Arc<SignalingClient>,
@@ -265,11 +265,9 @@ async fn handle_signaling_event(
             session.pc.set_remote_description(desc).await?;
         }
         SignalingEvent::IceCandidate(candidate) => {
-            let s = serde_json::to_string(&candidate)?;
-            if let Ok(init) = serde_json::from_str::<webrtc::ice::candidate::ICECandidateInit>(&s) {
-                if let Ok(c) = Candidate::from_json(init) {
-                    let _ = session.pc.add_ice_candidate(c).await;
-                }
+            // candidate 为 serde_json::Value，反序列化为 RTCIceCandidateInit 后直接添加
+            if let Ok(init) = serde_json::from_value::<RTCIceCandidateInit>(candidate) {
+                let _ = session.pc.add_ice_candidate(init).await;
             }
         }
         SignalingEvent::IceComplete => {
@@ -325,7 +323,7 @@ async fn handle_sdp_offer(
 fn bind_pc_handlers(
     pc: Arc<RTCPeerConnection>,
     event_tx: mpsc::UnboundedSender<PeerEvent>,
-    ice_tx: mpsc::UnboundedSender<webrtc::ice::candidate::ICECandidateInit>,
+    ice_tx: mpsc::UnboundedSender<RTCIceCandidateInit>,
 ) {
     let tx1 = event_tx.clone();
     pc.on_peer_connection_state_change(Box::new(move |s| {

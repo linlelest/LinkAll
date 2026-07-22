@@ -4,8 +4,7 @@
 use serde::Serialize;
 use tauri::State;
 
-use crate::daemon::{DaemonEvent, DaemonState};
-use crate::webrtc::control::SettingsSnapshot;
+use crate::daemon::DaemonState;
 
 /// 设备信息响应
 #[derive(Debug, Serialize)]

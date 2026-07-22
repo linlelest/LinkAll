@@ -6,7 +6,7 @@ use std::sync::Arc;
 
 use serde::Deserialize;
 use serde_json::Value;
-use tokio::sync::Mutex;
+use tokio::sync::{mpsc, Mutex};
 use webrtc::data_channel::RTCDataChannel;
 
 use crate::encoder::EncodedFrame;

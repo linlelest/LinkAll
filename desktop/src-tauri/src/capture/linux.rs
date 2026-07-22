@@ -12,6 +12,9 @@ pub struct LinuxCapturer {
     height: u32,
 }
 
+// scrap::Capturer 内部含原始指针（非 Send），但仅在专用截屏线程使用，标记 Send 安全
+unsafe impl Send for LinuxCapturer {}
+
 impl LinuxCapturer {
     pub fn new() -> Result<Self> {
         let display = Display::primary()

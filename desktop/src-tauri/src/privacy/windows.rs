@@ -3,7 +3,9 @@
 use anyhow::{Context, Result};
 use windows::core::w;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
-use windows::Win32::Graphics::Gdi::{GetStockObject, BLACK_BRUSH, HBRUSH};
+use windows::Win32::Graphics::Gdi::{
+    BeginPaint, EndPaint, FillRect, GetStockObject, BLACK_BRUSH, HBRUSH, PAINTSTRUCT,
+};
 use windows::Win32::System::Power::{
     SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED,
 };
@@ -11,7 +13,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     CreateWindowExW, DefWindowProcW, DestroyWindow, GetSystemMetrics, RegisterClassExW,
     SetWindowPos, ShowWindow, CS_HREDRAW, CS_VREDRAW, HWND_TOPMOST, SM_CXSCREEN, SM_CYSCREEN,
     SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_SHOWWINDOW, SW_SHOWNORMAL, WNDCLASSEXW,
-    WM_ERASEBKGND, WM_PAINT, PAINTSTRUCT, BeginPaint, EndPaint, FillRect,
+    WM_ERASEBKGND, WM_PAINT,
     WINDOW_EX_STYLE, WINDOW_STYLE, WS_EX_TOPMOST, WS_POPUP, WS_VISIBLE,
 };
 
@@ -24,6 +26,9 @@ pub struct WindowsPrivacy {
     /// 是否已开启
     enabled: bool,
 }
+
+// HWND 为原始指针包装，需手动声明 Send 以满足 PrivacyScreen trait 约束
+unsafe impl Send for WindowsPrivacy {}
 
 impl WindowsPrivacy {
     pub fn new() -> Result<Self> {

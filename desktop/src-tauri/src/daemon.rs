@@ -4,7 +4,7 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use rusqlite::Connection;
 use tokio::sync::{mpsc, Mutex};
 use tokio::time::Duration;
@@ -118,9 +118,8 @@ impl DaemonState {
             privacy_screen: false,
         };
 
-        // 创建 Peer 会话
+        // 创建 Peer 会话（PeerSession::new 已返回 Arc<PeerSession>）
         let (peer, mut event_rx) = PeerSession::new(sig_cfg, settings).await?;
-        let peer = Arc::new(peer);
 
         // 启动信令客户端
         peer.start_signaling().await?;

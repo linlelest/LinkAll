@@ -30,7 +30,7 @@ impl Frame {
 }
 
 /// 截屏器 trait：平台无关接口
-pub trait Capturer: Send {
+pub trait Capturer {
     /// 屏幕宽高
     fn size(&self) -> (u32, u32);
     /// 捕获一帧；返回 Ok(None) 表示暂无新帧（WouldBlock），Ok(Some) 为新帧
@@ -38,7 +38,7 @@ pub trait Capturer: Send {
 }
 
 /// 创建平台截屏器
-pub fn new_capturer() -> Result<Box<dyn Capturer>> {
+pub fn new_capturer() -> Result<Box<dyn Capturer + Send>> {
     #[cfg(target_os = "windows")]
     {
         Ok(Box::new(windows::WindowsCapturer::new()?))
@@ -61,7 +61,7 @@ pub fn screen_size() -> (u32, u32) {
 /// 采集循环：在专用线程中按目标 FPS 截屏，通过 mpsc 推送给编码/发送端。
 /// stop 置 true 时退出。
 pub fn capture_loop(
-    mut capturer: Box<dyn Capturer>,
+    mut capturer: Box<dyn Capturer + Send>,
     fps: u32,
     tx: mpsc::Sender<Frame>,
     stop: Arc<AtomicBool>,

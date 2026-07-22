@@ -4,11 +4,11 @@
 use anyhow::Result;
 use windows::Win32::UI::Input::KeyboardAndMouse::{
     KEYBD_EVENT_FLAGS, KEYBDINPUT, KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE,
-    MOUSE_DATA, MOUSE_EVENT_FLAGS, MOUSEINPUT, MOUSEEVENTF_ABSOLUTE, MOUSEEVENTF_HWHEEL,
+    MOUSE_EVENT_FLAGS, MOUSEINPUT, MOUSEEVENTF_ABSOLUTE, MOUSEEVENTF_HWHEEL,
     MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP,
     MOUSEEVENTF_MOVE, MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP, MOUSEEVENTF_WHEEL,
     MOUSEEVENTF_XDOWN, MOUSEEVENTF_XUP, INPUT, INPUT_0, INPUT_KEYBOARD, INPUT_MOUSE,
-    SendInput, VIRTUAL_KEY, XBUTTON1, XBUTTON2,
+    SendInput, VIRTUAL_KEY,
 };
 use windows::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_CXSCREEN, SM_CYSCREEN};
 
@@ -67,7 +67,7 @@ impl Win32Input {
                 mi: MOUSEINPUT {
                     dx,
                     dy,
-                    mouseData: MOUSE_DATA(data),
+                    mouseData: data,
                     dwFlags: MOUSE_EVENT_FLAGS(flags),
                     time: 0,
                     dwExtraInfo: 0,
