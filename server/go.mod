@@ -14,31 +14,3 @@ require (
 	golang.org/x/term v0.27.0
 	modernc.org/sqlite v1.34.5
 )
-
-require (
-	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/dustin/go-humanize v1.13.0 // indirect
-	github.com/klauspost/compress v1.17.11 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/layehq/gopher-lua v0.0.0-20231210155534-0f72a5681ab1 // indirect
-	github.com/pion/datachannel v1.5.2 // indirect
-	github.com/pion/dtls/v2 v2.2.7 // indirect
-	github.com/pion/interceptor v0.1.12 // indirect
-	github.com/pion/logging v0.2.2 // indirect
-	github.com/pion/mdns v0.0.5 // indirect
-	github.com/pion/randutil v0.1.0 // indirect
-	github.com/pion/rtcp v1.2.10 // indirect
-	github.com/pion/rtp v1.8.0 // indirect
-	github.com/pion/sctp v1.8.2 // indirect
-	github.com/pion/srtp/v2 v2.0.20 // indirect
-	github.com/pion/stun v0.4.0 // indirect
-	github.com/pion/transport/v2 v2.2.1 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.55.0 // indirect
-	golang.org/x/net v0.27.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
-	modernc.org/gc/v3 v3.0.0-20240107210532-5735e29ea7c9 // indirect
-)
