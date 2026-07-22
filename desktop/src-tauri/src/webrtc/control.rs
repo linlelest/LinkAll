@@ -6,10 +6,9 @@ use std::sync::Arc;
 
 use serde::Deserialize;
 use serde_json::Value;
-use tokio::sync::{mpsc, Mutex};
+use tokio::sync::Mutex;
 use webrtc::data_channel::RTCDataChannel;
 
-use crate::encoder::EncodedFrame;
 use crate::input::{self, InputInjector, MouseButton};
 
 /// 设置快照：用于在创建会话时传递初始配置，并接收 settings_sync 更新
@@ -138,8 +137,6 @@ pub struct ControlDispatcher {
     dc: Arc<RTCDataChannel>,
     /// 当前设置（运行时可被 settings_sync 更新）
     settings: SharedSettings,
-    /// 编码帧接收端（ControlDispatcher 持有以管理生命周期）
-    _frame_rx: Mutex<Option<mpsc::Receiver<EncodedFrame>>>,
     /// 键鼠注入器
     injector: SharedInjector,
 }
@@ -148,7 +145,6 @@ impl ControlDispatcher {
     pub fn new(
         dc: Arc<RTCDataChannel>,
         settings: SettingsSnapshot,
-        frame_rx: mpsc::Receiver<EncodedFrame>,
     ) -> Self {
         let injector: SharedInjector = Arc::new(Mutex::new(
             input::new_injector().unwrap_or_else(|e| {
@@ -160,7 +156,6 @@ impl ControlDispatcher {
         let dispatcher = Self {
             dc: dc.clone(),
             settings: settings.clone(),
-            _frame_rx: Mutex::new(Some(frame_rx)),
             injector: injector.clone(),
         };
         dispatcher.bind_data_channel(dc, injector, settings);

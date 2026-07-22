@@ -3,9 +3,8 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context, Result};
-use openh264::encoder::{Encoder, EncoderConfig, FrameType};
+use openh264::encoder::{Encoder, FrameType};
 use openh264::formats::YUVBuffer;
-use openh264::OpenH264API; // source 特性默认开启，OpenH264API::default() 使用内置源码构建
 
 use super::{EncodedFrame, VideoEncoder};
 
@@ -27,11 +26,8 @@ impl H264Encoder {
         if width == 0 || height == 0 {
             anyhow::bail!("编码尺寸非法：{}x{}", width, height);
         }
-        let api = OpenH264API::default();
-        // Baseline profile，码率上限由滑块设定（GCC 动态自适应以此为上界）
-        let config = EncoderConfig::new(width as usize, height as usize)
-            .set_bitrate_bps(bitrate_bps as u32);
-        let encoder = Encoder::with_api_config(api, config)
+        // openh264 0.7：使用默认配置创建编码器，宽高在编码时从 YUVSource 动态获取
+        let encoder = Encoder::new()
             .context("初始化 openh264 编码器失败")?;
         let yuv_len = (width as usize) * (height as usize) * 3 / 2;
         Ok(Self {
@@ -97,9 +93,9 @@ impl VideoEncoder for H264Encoder {
 fn bgra_to_i420(bgra: &[u8], w: usize, h: usize, i420: &mut [u8]) {
     let y_size = w * h;
     let u_size = y_size / 4;
-    let y_plane = &mut i420[..y_size];
-    let u_plane = &mut i420[y_size..y_size + u_size];
-    let v_plane = &mut i420[y_size + u_size..];
+    // 使用 split_at_mut 获取不重叠的可变切片，避免多次可变借用
+    let (y_plane, rest) = i420.split_at_mut(y_size);
+    let (u_plane, v_plane) = rest.split_at_mut(u_size);
 
     // Y 平面（全分辨率）
     for j in 0..h {

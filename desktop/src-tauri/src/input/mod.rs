@@ -100,7 +100,7 @@ pub fn lookup_key(name: &str) -> Option<PlatformKey> {
         }
     }
     // 特殊键
-    SPECIAL_MAP.iter().find(|(k, _)| **k == name).map(|(_, v)| *v)
+    SPECIAL_MAP.iter().find(|(k, _)| *k == name).map(|(_, v)| *v)
 }
 
 // 字母扫描码表（A-Z）

@@ -11,9 +11,11 @@ use webrtc::api::interceptor_registry::register_default_interceptors;
 use webrtc::api::media_engine::{MediaEngine, MIME_TYPE_H264};
 use webrtc::api::APIBuilder;
 use webrtc::ice_transport::ice_candidate::RTCIceCandidateInit;
+use webrtc::ice_transport::ice_connection_state::RTCIceConnectionState;
 use webrtc::interceptor::registry::Registry;
 use webrtc::media::Sample;
 use webrtc::peer_connection::configuration::RTCConfiguration;
+use webrtc::peer_connection::peer_connection_state::RTCPeerConnectionState;
 use webrtc::peer_connection::sdp::session_description::RTCSessionDescription;
 use webrtc::peer_connection::RTCPeerConnection;
 use webrtc::rtp_transceiver::rtp_codec::RTCRtpCodecCapability;
@@ -64,8 +66,8 @@ impl PeerSession {
         // 1) MediaEngine + 拦截器
         let mut m = MediaEngine::default();
         m.register_default_codecs()?;
-        let mut registry = Registry::new();
-        register_default_interceptors(&mut registry, &mut m)?;
+        let registry = Registry::new();
+        let registry = register_default_interceptors(registry, &mut m)?;
         let api = APIBuilder::new()
             .with_media_engine(m)
             .with_interceptor_registry(registry)
@@ -101,11 +103,10 @@ impl PeerSession {
             .create_data_channel("control", None)
             .await
             .context("创建 DataChannel 失败")?;
-        let dc_arc = Arc::new(dc);
 
         // 5) 控制分发器
         let (frame_tx, frame_rx) = mpsc::channel::<EncodedFrame>(8);
-        let control = Arc::new(ControlDispatcher::new(dc_arc.clone(), settings, frame_rx));
+        let control = Arc::new(ControlDispatcher::new(dc.clone(), settings));
 
         // 6) ICE 候选通道
         let (ice_tx, ice_rx) = mpsc::unbounded_channel::<RTCIceCandidateInit>();
@@ -327,29 +328,33 @@ fn bind_pc_handlers(
 ) {
     let tx1 = event_tx.clone();
     pc.on_peer_connection_state_change(Box::new(move |s| {
-        log::info!("PeerConnection 状态：{}", s);
-        let evt = match s.as_str() {
-            "connected" => Some(PeerEvent::Connected),
-            "disconnected" => Some(PeerEvent::Disconnected),
-            "failed" => Some(PeerEvent::Failed("peer connection failed".into())),
+        log::info!("PeerConnection 状态：{:?}", s);
+        let evt = match s {
+            RTCPeerConnectionState::Connected => Some(PeerEvent::Connected),
+            RTCPeerConnectionState::Disconnected => Some(PeerEvent::Disconnected),
+            RTCPeerConnectionState::Failed => Some(PeerEvent::Failed("peer connection failed".into())),
             _ => None,
         };
-        if let Some(evt) = evt {
-            let _ = tx1.send(evt);
-        }
+        Box::pin(async move {
+            if let Some(evt) = evt {
+                let _ = tx1.send(evt);
+            }
+        })
     }));
 
     let tx2 = event_tx.clone();
     pc.on_ice_connection_state_change(Box::new(move |s| {
-        log::info!("ICE 状态：{}", s);
-        let evt = match s.as_str() {
-            "connected" | "completed" => Some(PeerEvent::IceConnected),
-            "disconnected" | "failed" => Some(PeerEvent::IceDisconnected),
+        log::info!("ICE 状态：{:?}", s);
+        let evt = match s {
+            RTCIceConnectionState::Connected | RTCIceConnectionState::Completed => Some(PeerEvent::IceConnected),
+            RTCIceConnectionState::Disconnected | RTCIceConnectionState::Failed => Some(PeerEvent::IceDisconnected),
             _ => None,
         };
-        if let Some(evt) = evt {
-            let _ = tx2.send(evt);
-        }
+        Box::pin(async move {
+            if let Some(evt) = evt {
+                let _ = tx2.send(evt);
+            }
+        })
     }));
 
     // 本地 ICE 候选：通过通道传递给 run_loop，由其转发到信令服务器

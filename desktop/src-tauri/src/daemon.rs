@@ -10,7 +10,7 @@ use tokio::sync::{mpsc, Mutex};
 use tokio::time::Duration;
 
 use crate::auth;
-use crate::capture::{self, Capturer};
+use crate::capture;
 use crate::config::{self, AppConfig};
 use crate::device::{self, DeviceInfo};
 use crate::encoder::{self, VideoCodec};
@@ -236,8 +236,8 @@ impl DaemonState {
         }
 
         // 重置停止标志以备下次启动
-        self.capture_stop = Arc::new(AtomicBool::new(false));
-        self.encode_stop = Arc::new(AtomicBool::new(false));
+        self.capture_stop.store(false, Ordering::Relaxed);
+        self.encode_stop.store(false, Ordering::Relaxed);
 
         self.running.store(false, Ordering::Relaxed);
         self.paused.store(false, Ordering::Relaxed);

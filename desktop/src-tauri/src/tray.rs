@@ -69,13 +69,9 @@ fn show_settings_window(app: &AppHandle) {
     }
 }
 
-/// 加载托盘图标（从内嵌资源）
-fn load_tray_icon(app: &AppHandle) -> tauri::image::Image<'static> {
-    // 优先使用应用默认窗口图标（来自 tauri.conf.json 配置）
-    if let Some(icon) = app.default_window_icon() {
-        return icon.clone();
-    }
-    // 回退：从内嵌 PNG 文件加载
+/// 加载托盘图标（从内嵌资源，'static 生命周期）
+fn load_tray_icon(_app: &AppHandle) -> tauri::image::Image<'static> {
+    // 从内嵌 PNG 文件加载，确保返回 'static 生命周期的图像
     let bytes = include_bytes!("../icons/icon.png");
     tauri::image::Image::from_bytes(bytes.as_slice())
         .unwrap_or_else(|_| tauri::image::Image::new(&[], 0, 0))

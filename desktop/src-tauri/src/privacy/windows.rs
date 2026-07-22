@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use windows::core::w;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, WPARAM};
 use windows::Win32::Graphics::Gdi::{
-    BeginPaint, EndPaint, FillRect, GetStockObject, BLACK_BRUSH, HBRUSH, PAINTSTRUCT,
+    BeginPaint, EndPaint, GetStockObject, BLACK_BRUSH, HBRUSH, PAINTSTRUCT,
 };
 use windows::Win32::System::Power::{
     SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED,
@@ -68,7 +68,7 @@ impl WindowsPrivacy {
                 WINDOW_EX_STYLE(WS_EX_TOPMOST.0),
                 class_name,
                 w!("LinkALL"),
-                WINDOW_STYLE(WS_POPUP | WS_VISIBLE),
+                WS_POPUP | WS_VISIBLE,
                 0,
                 0,
                 w,
@@ -85,7 +85,7 @@ impl WindowsPrivacy {
         unsafe {
             SetWindowPos(
                 hwnd,
-                Some(HWND_TOPMOST),
+                HWND_TOPMOST,
                 0,
                 0,
                 0,
@@ -154,7 +154,7 @@ impl Drop for WindowsPrivacy {
 }
 
 /// 默认窗口过程：黑色背景由窗口类画刷自动填充
-fn def_window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+unsafe extern "system" fn def_window_proc(hwnd: HWND, msg: u32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
     match msg {
         WM_PAINT => {
             // 仅调用 BeginPaint/EndPaint 验证绘制区域，背景由 hbrBackground 填充
