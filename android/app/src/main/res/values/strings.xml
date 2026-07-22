@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LinkALL 中文字符串（默认语言 zh-CN） -->
+<resources>
+    <string name="app_name">LinkALL</string>
+    <string name="app_tagline">极轻量级跨平台远程控制系统</string>
+
+    <!-- 导航页签 -->
+    <string name="nav_controlled">被控</string>
+    <string name="nav_controller">控制</string>
+    <string name="nav_manage">管理</string>
+    <string name="nav_dashboard">仪表盘</string>
+    <string name="nav_devices">设备</string>
+    <string name="nav_control">远程控制</string>
+    <string name="nav_announcements">公告</string>
+    <string name="nav_settings">设置</string>
+    <string name="nav_ota">检查更新</string>
+    <string name="nav_logout">退出登录</string>
+
+    <!-- 通用 -->
+    <string name="common_ok">确定</string>
+    <string name="common_cancel">取消</string>
+    <string name="common_save">保存</string>
+    <string name="common_close">关闭</string>
+    <string name="common_copy">复制</string>
+    <string name="common_copied">已复制</string>
+    <string name="common_delete">删除</string>
+    <string name="common_edit">编辑</string>
+    <string name="common_refresh">刷新</string>
+    <string name="common_loading">加载中...</string>
+    <string name="common_empty">暂无数据</string>
+    <string name="common_search">搜索</string>
+    <string name="common_confirm">确认</string>
+    <string name="common_yes">是</string>
+    <string name="common_no">否</string>
+    <string name="common_all">全部</string>
+    <string name="common_online">在线</string>
+    <string name="common_offline">离线</string>
+    <string name="common_busy">忙碌</string>
+    <string name="common_sleeping">休眠</string>
+    <string name="common_success">操作成功</string>
+    <string name="common_failed">操作失败</string>
+    <string name="common_retry">重试</string>
+    <string name="common_export">导出</string>
+    <string name="common_generate">生成</string>
+    <string name="common_revoke">吊销</string>
+    <string name="common_kick">踢出</string>
+    <string name="common_connect">连接</string>
+    <string name="common_disconnect">断开</string>
+    <string name="common_back">返回</string>
+    <string name="common_next">下一步</string>
+    <string name="common_prev">上一步</string>
+    <string name="common_total">共 %1$d 项</string>
+
+    <!-- 登录 -->
+    <string name="login_title">登录 LinkALL</string>
+    <string name="login_subtitle">请输入账号密码登录管理后台</string>
+    <string name="login_username">用户名</string>
+    <string name="login_password">密码</string>
+    <string name="login_submit">登录</string>
+    <string name="login_register_tab">注册</string>
+    <string name="login_register_title">注册新账号</string>
+    <string name="login_register_subtitle">需邀请码方可注册</string>
+    <string name="login_invite_code">邀请码</string>
+    <string name="login_confirm_password">确认密码</string>
+    <string name="login_register_submit">注册并登录</string>
+    <string name="login_to_login">已有账号？去登录</string>
+    <string name="login_to_register">没有账号？去注册</string>
+    <string name="login_error_auth">用户名或密码错误</string>
+    <string name="login_error_banned">账号已被封禁</string>
+    <string name="login_error_invite">邀请码无效或已使用</string>
+    <string name="login_error_password_short">密码至少 8 位</string>
+    <string name="login_error_username_short">用户名至少 3 位</string>
+    <string name="login_error_password_mismatch">两次输入的密码不一致</string>
+    <string name="login_error_username_exists">用户名已存在</string>
+    <string name="login_welcome">欢迎回来，%1$s</string>
+
+    <!-- 被控端 -->
+    <string name="controlled_title">被控端</string>
+    <string name="controlled_service_status">服务状态</string>
+    <string name="controlled_running">运行中</string>
+    <string name="controlled_stopped">已停止</string>
+    <string name="controlled_start">启动服务</string>
+    <string name="controlled_stop">停止服务</string>
+    <string name="controlled_device_id">设备编号</string>
+    <string name="controlled_device_code">设备码</string>
+    <string name="controlled_reset_id">重置设备编号</string>
+    <string name="controlled_reset_code">重置设备码</string>
+    <string name="controlled_custom_id">自定义编号</string>
+    <string name="controlled_logout">退出软件</string>
+    <string name="controlled_logout_confirm">退出将彻底停止服务、取消通知并清理缓存，确定继续？</string>
+
+    <!-- 权限引导 -->
+    <string name="permission_title">权限引导</string>
+    <string name="permission_accessibility">无障碍服务</string>
+    <string name="permission_accessibility_desc">用于键鼠注入到远端屏幕</string>
+    <string name="permission_display_over_other">后台弹出界面</string>
+    <string name="permission_display_over_other_desc">连接确认弹窗可在后台显示</string>
+    <string name="permission_battery">电池优化白名单</string>
+    <string name="permission_battery_desc">避免系统省电策略杀进程</string>
+    <string name="permission_autostart">开机自启</string>
+    <string name="permission_autostart_desc">开机后自动恢复保活</string>
+    <string name="permission_capture">屏幕录制</string>
+    <string name="permission_capture_desc">截屏流传输到控制端</string>
+    <string name="permission_notification">通知权限</string>
+    <string name="permission_notification_desc">前台保活通知常驻</string>
+    <string name="permission_open_setting">去开启</string>
+    <string name="permission_granted">已开启</string>
+    <string name="permission_not_granted">未开启</string>
+
+    <!-- 通知栏快捷开关 -->
+    <string name="notif_channel_service">前台保活服务</string>
+    <string name="notif_channel_service_desc">LinkALL 被控服务运行中</string>
+    <string name="notif_channel_transfer">文件传输</string>
+    <string name="notif_channel_transfer_desc">文件传输进度通知</string>
+    <string name="notif_title_running">LinkALL 被控服务运行中</string>
+    <string name="notif_text_running">设备编号 %1$s</string>
+    <string name="notif_action_disconnect">断开连接</string>
+    <string name="notif_action_privacy">防窥屏</string>
+    <string name="notif_action_file">接收文件</string>
+
+    <!-- 安全设置 -->
+    <string name="security_title">安全设置</string>
+    <string name="security_allow_anonymous">允许匿名连接</string>
+    <string name="security_allow_device_code">允许设备码连接</string>
+    <string name="security_allow_remote_control">远程控制总开关</string>
+
+    <!-- 连接确认弹窗 -->
+    <string name="confirm_title">允许控制？</string>
+    <string name="confirm_body">来自 %1$s 的请求（ID：%2$s，设备：%3$s）请求控制本设备，请选择授权方式：</string>
+    <string name="confirm_once">仅本次允许</string>
+    <string name="confirm_always">永久允许</string>
+    <string name="confirm_deny">拒绝</string>
+    <string name="confirm_device_code">输入设备码放行</string>
+    <string name="confirm_pending">等待被控端确认...</string>
+    <string name="confirm_denied">连接请求被拒绝</string>
+    <string name="confirm_timeout">确认超时，请重试</string>
+
+    <!-- 控制端 -->
+    <string name="control_title">远程控制</string>
+    <string name="control_device_id">设备编号（12 位）</string>
+    <string name="control_device_code">设备码</string>
+    <string name="control_mode">连接模式</string>
+    <string name="control_mode_anonymous">匿名</string>
+    <string name="control_mode_same_account">同账号</string>
+    <string name="control_mode_device_code">设备码</string>
+    <string name="control_connect">连接</string>
+    <string name="control_connecting">连接中...</string>
+    <string name="control_disconnect">断开连接</string>
+    <string name="control_connected">已连接</string>
+    <string name="control_disconnected">已断开</string>
+    <string name="control_connection_failed">连接失败：%1$s</string>
+    <string name="control_id_invalid">设备编号必须为 12 位</string>
+    <string name="control_id_placeholder">请输入 12 位设备编号</string>
+    <string name="control_code_placeholder">请输入设备码</string>
+    <string name="control_discovered_devices">同账号设备</string>
+
+    <!-- 控制参数面板 -->
+    <string name="control_settings">控制设置</string>
+    <string name="control_scale">屏幕缩放</string>
+    <string name="control_bitrate">码率上限</string>
+    <string name="control_fps">帧率</string>
+    <string name="control_privacy_screen">防窥屏</string>
+    <string name="control_privacy_screen_on">已开启黑屏</string>
+    <string name="control_privacy_screen_off">已关闭</string>
+    <string name="control_scale_watermark">%1$d%%</string>
+    <string name="control_codec">编解码</string>
+    <string name="control_codec_auto">自动</string>
+
+    <!-- 虚拟工具 -->
+    <string name="control_keyboard">虚拟键盘</string>
+    <string name="control_keyboard_show">显示键盘</string>
+    <string name="control_keyboard_hide">隐藏键盘</string>
+    <string name="control_keyboard_enter">回车</string>
+    <string name="control_keyboard_esc">ESC</string>
+    <string name="control_keyboard_backspace">退格</string>
+    <string name="control_keyboard_tab">Tab</string>
+    <string name="control_keyboard_space">空格</string>
+    <string name="control_keyboard_shift">Shift</string>
+    <string name="control_keyboard_ctrl">Ctrl</string>
+    <string name="control_keyboard_alt">Alt</string>
+    <string name="control_keyboard_win">Win</string>
+
+    <string name="control_mouse_left">左键</string>
+    <string name="control_mouse_right">右键</string>
+    <string name="control_mouse_opacity">透明度</string>
+    <string name="control_wheel">滚轮</string>
+    <string name="control_wheel_sensitivity">灵敏度</string>
+
+    <!-- 文件传输 -->
+    <string name="control_files">文件传输</string>
+    <string name="control_files_local">本地</string>
+    <string name="control_files_remote">远程</string>
+    <string name="control_files_upload">上传</string>
+    <string name="control_files_download">下载</string>
+    <string name="control_files_resume">断点续传</string>
+    <string name="control_files_path">目标路径</string>
+    <string name="control_files_queue">传输队列</string>
+    <string name="control_files_progress">进度</string>
+    <string name="control_files_name">文件名</string>
+    <string name="control_files_size">大小</string>
+    <string name="control_files_status">状态</string>
+    <string name="control_files_pending">等待中</string>
+    <string name="control_files_transferring">传输中</string>
+    <string name="control_files_done">已完成</string>
+    <string name="control_files_failed">失败</string>
+    <string name="control_files_paused">已暂停</string>
+    <string name="control_files_empty">暂无传输任务</string>
+
+    <!-- 状态 -->
+    <string name="status_rtt">RTT</string>
+    <string name="status_packet_loss">丢包率</string>
+    <string name="status_bitrate">码率</string>
+    <string name="status_fps">帧率</string>
+    <string name="status_codec">编码</string>
+    <string name="status_duration">时长</string>
+
+    <!-- 设置 -->
+    <string name="settings_title">设置</string>
+    <string name="settings_account">账号设置</string>
+    <string name="settings_advanced">高级设置</string>
+    <string name="settings_account_section">账号与安全</string>
+    <string name="settings_change_password">修改密码</string>
+    <string name="settings_old_password">原密码</string>
+    <string name="settings_new_password">新密码</string>
+    <string name="settings_confirm_password">确认新密码</string>
+    <string name="settings_password_changed">密码已修改</string>
+    <string name="settings_password_mismatch">两次密码不一致</string>
+    <string name="settings_password_short">新密码至少 8 位</string>
+    <string name="settings_old_password_wrong">原密码错误</string>
+    <string name="settings_invite_codes">邀请码管理</string>
+    <string name="settings_invite_generate">生成邀请码</string>
+    <string name="settings_invite_count">数量</string>
+    <string name="settings_invite_ttl">有效期（小时）</string>
+    <string name="settings_invite_note">备注</string>
+    <string name="settings_invite_list">邀请码列表</string>
+    <string name="settings_invite_code">邀请码</string>
+    <string name="settings_invite_status">状态</string>
+    <string name="settings_invite_used">已使用</string>
+    <string name="settings_invite_unused">未使用</string>
+    <string name="settings_invite_revoked">已吊销</string>
+    <string name="settings_invite_expired">已过期</string>
+    <string name="settings_invite_used_by">使用者</string>
+    <string name="settings_invite_created_at">生成时间</string>
+    <string name="settings_invite_expires_at">过期时间</string>
+    <string name="settings_invite_export">导出 CSV</string>
+    <string name="settings_invite_revoke_confirm">确定吊销此邀请码？</string>
+    <string name="settings_invite_revoked_ok">已吊销</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_language_zh">简体中文</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_system">跟随系统</string>
+    <string name="settings_advanced_section">高级配置</string>
+    <string name="settings_server_address">自定义服务器地址</string>
+    <string name="settings_server_address_hint">覆盖默认服务器，留空使用默认</string>
+    <string name="settings_connection_timeout">连接超时阈值（秒）</string>
+    <string name="settings_log_level">日志级别</string>
+    <string name="settings_saved">已保存</string>
+
+    <!-- OTA -->
+    <string name="ota_title">检查更新</string>
+    <string name="ota_check">检查更新</string>
+    <string name="ota_checking">正在检查...</string>
+    <string name="ota_up_to_date">已是最新版本</string>
+    <string name="ota_update_available">发现新版本 %1$s</string>
+    <string name="ota_release_notes">更新日志</string>
+    <string name="ota_download">下载并安装</string>
+    <string name="ota_downloading">下载中 %1$d%%</string>
+    <string name="ota_download_complete">下载完成</string>
+    <string name="ota_install_now">立即安装</string>
+    <string name="ota_force_update">此为强制更新，必须安装后才能继续使用</string>
+    <string name="ota_current_version">当前版本</string>
+    <string name="ota_latest_version">最新版本</string>
+    <string name="ota_no_release">暂无可用更新</string>
+
+    <!-- 公告 -->
+    <string name="announcements_title">系统公告</string>
+    <string name="announcements_pinned">置顶</string>
+    <string name="announcements_expand">展开</string>
+    <string name="announcements_collapse">收起</string>
+    <string name="announcements_empty">暂无公告</string>
+    <string name="announcements_mark_read">标记已读</string>
+    <string name="announcements_read">已读</string>
+    <string name="announcements_unread">未读</string>
+    <string name="announcements_published_at">发布于 %1$s</string>
+
+    <!-- 设备管理 -->
+    <string name="devices_title">设备管理</string>
+    <string name="devices_device_id">设备编号</string>
+    <string name="devices_device_name">设备名称</string>
+    <string name="devices_platform">平台</string>
+    <string name="devices_version">版本</string>
+    <string name="devices_status">状态</string>
+    <string name="devices_last_seen">最后在线</string>
+    <string name="devices_owner">所属用户</string>
+    <string name="devices_created_at">注册时间</string>
+    <string name="devices_copy_id">复制编号</string>
+    <string name="devices_copy_name">复制名称</string>
+    <string name="devices_kick_confirm">确定踢出设备 %1$s 的所有会话？</string>
+    <string name="devices_kicked">已踢出</string>
+    <string name="devices_kick_failed">踢出失败：设备可能已离线</string>
+    <string name="devices_empty">暂无设备记录</string>
+    <string name="devices_filter_online">仅在线</string>
+
+    <!-- 无障碍服务 -->
+    <string name="accessibility_service_label">LinkALL 远程控制键鼠注入</string>
+    <string name="accessibility_service_desc">LinkALL 用于将远端控制端的键盘鼠标事件注入到本地系统，实现远程控制功能。仅在用户主动开启被控服务时生效。</string>
+
+    <!-- 错误码 -->
+    <string name="error_ok">成功</string>
+    <string name="error_auth_failed">用户名或密码错误</string>
+    <string name="error_auth_expired">登录已过期，请重新登录</string>
+    <string name="error_permission_denied">权限不足</string>
+    <string name="error_device_not_found">设备未找到</string>
+    <string name="error_device_offline">设备离线</string>
+    <string name="error_device_busy">设备忙，已有控制端连接</string>
+    <string name="error_device_code_invalid">设备码错误</string>
+    <string name="error_invite_code_invalid">邀请码无效</string>
+    <string name="error_invite_code_used">邀请码已被使用</string>
+    <string name="error_invite_code_expired">邀请码已过期</string>
+    <string name="error_user_banned">账号已被封禁</string>
+    <string name="error_max_sessions_reached">已达最大并发会话数限制</string>
+    <string name="error_session_not_found">会话不存在</string>
+    <string name="error_session_timeout">会话超时，30 分钟无操作已自动休眠</string>
+    <string name="error_signaling_handshake_failed">信令握手失败</string>
+    <string name="error_webrtc_connection_failed">WebRTC 连接建立失败</string>
+    <string name="error_file_transfer_failed">文件传输失败</string>
+    <string name="error_file_hash_mismatch">文件哈希校验失败</string>
+    <string name="error_rate_limited">请求过于频繁，已被限流</string>
+    <string name="error_invalid_payload">请求体格式错误</string>
+    <string name="error_replay_detected">检测到消息重放</string>
+    <string name="error_internal_error">服务器内部错误</string>
+    <string name="error_maintenance">服务器维护中</string>
+    <string name="error_network">网络错误，请检查连接</string>
+    <string name="error_unknown">未知错误</string>
+</resources>

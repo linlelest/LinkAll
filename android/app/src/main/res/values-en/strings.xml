@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LinkALL English strings (en-US) -->
+<resources>
+    <string name="app_name">LinkALL</string>
+    <string name="app_tagline">Ultra-lightweight cross-platform remote control</string>
+
+    <!-- Navigation tabs -->
+    <string name="nav_controlled">Controlled</string>
+    <string name="nav_controller">Controller</string>
+    <string name="nav_manage">Manage</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_devices">Devices</string>
+    <string name="nav_control">Remote Control</string>
+    <string name="nav_announcements">Announcements</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_ota">Check Update</string>
+    <string name="nav_logout">Logout</string>
+
+    <!-- Common -->
+    <string name="common_ok">OK</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_close">Close</string>
+    <string name="common_copy">Copy</string>
+    <string name="common_copied">Copied</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_refresh">Refresh</string>
+    <string name="common_loading">Loading...</string>
+    <string name="common_empty">No data</string>
+    <string name="common_search">Search</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_yes">Yes</string>
+    <string name="common_no">No</string>
+    <string name="common_all">All</string>
+    <string name="common_online">Online</string>
+    <string name="common_offline">Offline</string>
+    <string name="common_busy">Busy</string>
+    <string name="common_sleeping">Sleeping</string>
+    <string name="common_success">Success</string>
+    <string name="common_failed">Failed</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_export">Export</string>
+    <string name="common_generate">Generate</string>
+    <string name="common_revoke">Revoke</string>
+    <string name="common_kick">Kick</string>
+    <string name="common_connect">Connect</string>
+    <string name="common_disconnect">Disconnect</string>
+    <string name="common_back">Back</string>
+    <string name="common_next">Next</string>
+    <string name="common_prev">Previous</string>
+    <string name="common_total">%1$d items</string>
+
+    <!-- Login -->
+    <string name="login_title">Login to LinkALL</string>
+    <string name="login_subtitle">Enter credentials to access admin</string>
+    <string name="login_username">Username</string>
+    <string name="login_password">Password</string>
+    <string name="login_submit">Login</string>
+    <string name="login_register_tab">Register</string>
+    <string name="login_register_title">Register new account</string>
+    <string name="login_register_subtitle">Invite code required</string>
+    <string name="login_invite_code">Invite code</string>
+    <string name="login_confirm_password">Confirm password</string>
+    <string name="login_register_submit">Register &amp; Login</string>
+    <string name="login_to_login">Have an account? Login</string>
+    <string name="login_to_register">No account? Register</string>
+    <string name="login_error_auth">Wrong username or password</string>
+    <string name="login_error_banned">Account banned</string>
+    <string name="login_error_invite">Invalid or used invite code</string>
+    <string name="login_error_password_short">Password too short (min 8)</string>
+    <string name="login_error_username_short">Username too short (min 3)</string>
+    <string name="login_error_password_mismatch">Passwords do not match</string>
+    <string name="login_error_username_exists">Username already exists</string>
+    <string name="login_welcome">Welcome back, %1$s</string>
+
+    <!-- Controlled -->
+    <string name="controlled_title">Controlled</string>
+    <string name="controlled_service_status">Service status</string>
+    <string name="controlled_running">Running</string>
+    <string name="controlled_stopped">Stopped</string>
+    <string name="controlled_start">Start service</string>
+    <string name="controlled_stop">Stop service</string>
+    <string name="controlled_device_id">Device ID</string>
+    <string name="controlled_device_code">Device code</string>
+    <string name="controlled_reset_id">Reset device ID</string>
+    <string name="controlled_reset_code">Reset device code</string>
+    <string name="controlled_custom_id">Custom ID</string>
+    <string name="controlled_logout">Exit app</string>
+    <string name="controlled_logout_confirm">This will stop service, cancel notifications and clear cache. Continue?</string>
+
+    <!-- Permissions -->
+    <string name="permission_title">Permissions</string>
+    <string name="permission_accessibility">Accessibility service</string>
+    <string name="permission_accessibility_desc">Inject keyboard/mouse events</string>
+    <string name="permission_display_over_other">Display over other apps</string>
+    <string name="permission_display_over_other_desc">Show confirm dialog in background</string>
+    <string name="permission_battery">Battery optimization whitelist</string>
+    <string name="permission_battery_desc">Avoid being killed by doze</string>
+    <string name="permission_autostart">Auto start on boot</string>
+    <string name="permission_autostart_desc">Resume keep-alive after reboot</string>
+    <string name="permission_capture">Screen capture</string>
+    <string name="permission_capture_desc">Stream screen to controller</string>
+    <string name="permission_notification">Notifications</string>
+    <string name="permission_notification_desc">Persistent keep-alive notification</string>
+    <string name="permission_open_setting">Open</string>
+    <string name="permission_granted">Granted</string>
+    <string name="permission_not_granted">Not granted</string>
+
+    <!-- Notifications -->
+    <string name="notif_channel_service">Keep-alive service</string>
+    <string name="notif_channel_service_desc">LinkALL controlled service running</string>
+    <string name="notif_channel_transfer">File transfer</string>
+    <string name="notif_channel_transfer_desc">File transfer progress</string>
+    <string name="notif_title_running">LinkALL controlled service running</string>
+    <string name="notif_text_running">Device ID %1$s</string>
+    <string name="notif_action_disconnect">Disconnect</string>
+    <string name="notif_action_privacy">Privacy screen</string>
+    <string name="notif_action_file">Receive file</string>
+
+    <!-- Security -->
+    <string name="security_title">Security</string>
+    <string name="security_allow_anonymous">Allow anonymous connections</string>
+    <string name="security_allow_device_code">Allow device code connections</string>
+    <string name="security_allow_remote_control">Remote control master switch</string>
+
+    <!-- Confirm dialog -->
+    <string name="confirm_title">Allow control?</string>
+    <string name="confirm_body">Request from %1$s (ID: %2$s, device: %3$s) wants to control this device:</string>
+    <string name="confirm_once">Allow once</string>
+    <string name="confirm_always">Always allow</string>
+    <string name="confirm_deny">Deny</string>
+    <string name="confirm_device_code">Enter device code</string>
+    <string name="confirm_pending">Waiting for confirmation...</string>
+    <string name="confirm_denied">Connection request denied</string>
+    <string name="confirm_timeout">Confirmation timeout, please retry</string>
+
+    <!-- Controller -->
+    <string name="control_title">Remote Control</string>
+    <string name="control_device_id">Device ID (12 digits)</string>
+    <string name="control_device_code">Device code</string>
+    <string name="control_mode">Connection mode</string>
+    <string name="control_mode_anonymous">Anonymous</string>
+    <string name="control_mode_same_account">Same account</string>
+    <string name="control_mode_device_code">Device code</string>
+    <string name="control_connect">Connect</string>
+    <string name="control_connecting">Connecting...</string>
+    <string name="control_disconnect">Disconnect</string>
+    <string name="control_connected">Connected</string>
+    <string name="control_disconnected">Disconnected</string>
+    <string name="control_connection_failed">Connection failed: %1$s</string>
+    <string name="control_id_invalid">Device ID must be 12 digits</string>
+    <string name="control_id_placeholder">Enter 12-digit device ID</string>
+    <string name="control_code_placeholder">Enter device code</string>
+    <string name="control_discovered_devices">Same account devices</string>
+
+    <!-- Control settings -->
+    <string name="control_settings">Settings</string>
+    <string name="control_scale">Scale</string>
+    <string name="control_bitrate">Max bitrate</string>
+    <string name="control_fps">Frame rate</string>
+    <string name="control_privacy_screen">Privacy screen</string>
+    <string name="control_privacy_screen_on">Black screen on</string>
+    <string name="control_privacy_screen_off">Off</string>
+    <string name="control_scale_watermark">%1$d%%</string>
+    <string name="control_codec">Codec</string>
+    <string name="control_codec_auto">Auto</string>
+
+    <!-- Virtual tools -->
+    <string name="control_keyboard">Virtual keyboard</string>
+    <string name="control_keyboard_show">Show keyboard</string>
+    <string name="control_keyboard_hide">Hide keyboard</string>
+    <string name="control_keyboard_enter">Enter</string>
+    <string name="control_keyboard_esc">ESC</string>
+    <string name="control_keyboard_backspace">Backspace</string>
+    <string name="control_keyboard_tab">Tab</string>
+    <string name="control_keyboard_space">Space</string>
+    <string name="control_keyboard_shift">Shift</string>
+    <string name="control_keyboard_ctrl">Ctrl</string>
+    <string name="control_keyboard_alt">Alt</string>
+    <string name="control_keyboard_win">Win</string>
+
+    <string name="control_mouse_left">Left</string>
+    <string name="control_mouse_right">Right</string>
+    <string name="control_mouse_opacity">Opacity</string>
+    <string name="control_wheel">Wheel</string>
+    <string name="control_wheel_sensitivity">Sensitivity</string>
+
+    <!-- Files -->
+    <string name="control_files">File transfer</string>
+    <string name="control_files_local">Local</string>
+    <string name="control_files_remote">Remote</string>
+    <string name="control_files_upload">Upload</string>
+    <string name="control_files_download">Download</string>
+    <string name="control_files_resume">Resume</string>
+    <string name="control_files_path">Target path</string>
+    <string name="control_files_queue">Queue</string>
+    <string name="control_files_progress">Progress</string>
+    <string name="control_files_name">Name</string>
+    <string name="control_files_size">Size</string>
+    <string name="control_files_status">Status</string>
+    <string name="control_files_pending">Pending</string>
+    <string name="control_files_transferring">Transferring</string>
+    <string name="control_files_done">Done</string>
+    <string name="control_files_failed">Failed</string>
+    <string name="control_files_paused">Paused</string>
+    <string name="control_files_empty">No transfers</string>
+
+    <!-- Status -->
+    <string name="status_rtt">RTT</string>
+    <string name="status_packet_loss">Loss</string>
+    <string name="status_bitrate">Bitrate</string>
+    <string name="status_fps">FPS</string>
+    <string name="status_codec">Codec</string>
+    <string name="status_duration">Duration</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_advanced">Advanced</string>
+    <string name="settings_account_section">Account &amp; security</string>
+    <string name="settings_change_password">Change password</string>
+    <string name="settings_old_password">Old password</string>
+    <string name="settings_new_password">New password</string>
+    <string name="settings_confirm_password">Confirm new password</string>
+    <string name="settings_password_changed">Password changed</string>
+    <string name="settings_password_mismatch">Passwords do not match</string>
+    <string name="settings_password_short">Password too short (min 8)</string>
+    <string name="settings_old_password_wrong">Old password wrong</string>
+    <string name="settings_invite_codes">Invite codes</string>
+    <string name="settings_invite_generate">Generate invite</string>
+    <string name="settings_invite_count">Count</string>
+    <string name="settings_invite_ttl">TTL (hours)</string>
+    <string name="settings_invite_note">Note</string>
+    <string name="settings_invite_list">Invite list</string>
+    <string name="settings_invite_code">Code</string>
+    <string name="settings_invite_status">Status</string>
+    <string name="settings_invite_used">Used</string>
+    <string name="settings_invite_unused">Unused</string>
+    <string name="settings_invite_revoked">Revoked</string>
+    <string name="settings_invite_expired">Expired</string>
+    <string name="settings_invite_used_by">Used by</string>
+    <string name="settings_invite_created_at">Created</string>
+    <string name="settings_invite_expires_at">Expires</string>
+    <string name="settings_invite_export">Export CSV</string>
+    <string name="settings_invite_revoke_confirm">Revoke this invite?</string>
+    <string name="settings_invite_revoked_ok">Revoked</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_zh">简体中文</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_system">System</string>
+    <string name="settings_advanced_section">Advanced</string>
+    <string name="settings_server_address">Custom server address</string>
+    <string name="settings_server_address_hint">Override default server</string>
+    <string name="settings_connection_timeout">Connection timeout (s)</string>
+    <string name="settings_log_level">Log level</string>
+    <string name="settings_saved">Saved</string>
+
+    <!-- OTA -->
+    <string name="ota_title">Check Update</string>
+    <string name="ota_check">Check</string>
+    <string name="ota_checking">Checking...</string>
+    <string name="ota_up_to_date">Up to date</string>
+    <string name="ota_update_available">New version %1$s available</string>
+    <string name="ota_release_notes">Release notes</string>
+    <string name="ota_download">Download &amp; install</string>
+    <string name="ota_downloading">Downloading %1$d%%</string>
+    <string name="ota_download_complete">Download complete</string>
+    <string name="ota_install_now">Install now</string>
+    <string name="ota_force_update">Force update: must install to continue</string>
+    <string name="ota_current_version">Current</string>
+    <string name="ota_latest_version">Latest</string>
+    <string name="ota_no_release">No release available</string>
+
+    <!-- Announcements -->
+    <string name="announcements_title">Announcements</string>
+    <string name="announcements_pinned">Pinned</string>
+    <string name="announcements_expand">Expand</string>
+    <string name="announcements_collapse">Collapse</string>
+    <string name="announcements_empty">No announcements</string>
+    <string name="announcements_mark_read">Mark read</string>
+    <string name="announcements_read">Read</string>
+    <string name="announcements_unread">Unread</string>
+    <string name="announcements_published_at">Published %1$s</string>
+
+    <!-- Devices -->
+    <string name="devices_title">Devices</string>
+    <string name="devices_device_id">Device ID</string>
+    <string name="devices_device_name">Device name</string>
+    <string name="devices_platform">Platform</string>
+    <string name="devices_version">Version</string>
+    <string name="devices_status">Status</string>
+    <string name="devices_last_seen">Last seen</string>
+    <string name="devices_owner">Owner</string>
+    <string name="devices_created_at">Created</string>
+    <string name="devices_copy_id">Copy ID</string>
+    <string name="devices_copy_name">Copy name</string>
+    <string name="devices_kick_confirm">Kick all sessions of device %1$s?</string>
+    <string name="devices_kicked">Kicked</string>
+    <string name="devices_kick_failed">Kick failed: device may be offline</string>
+    <string name="devices_empty">No devices</string>
+    <string name="devices_filter_online">Online only</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_service_label">LinkALL remote control input injection</string>
+    <string name="accessibility_service_desc">LinkALL injects keyboard/mouse events from remote controller into local system. Only active when controlled service is manually enabled.</string>
+
+    <!-- Errors -->
+    <string name="error_ok">Success</string>
+    <string name="error_auth_failed">Wrong username or password</string>
+    <string name="error_auth_expired">Session expired, please login again</string>
+    <string name="error_permission_denied">Permission denied</string>
+    <string name="error_device_not_found">Device not found</string>
+    <string name="error_device_offline">Device offline</string>
+    <string name="error_device_busy">Device busy, controller connected</string>
+    <string name="error_device_code_invalid">Invalid device code</string>
+    <string name="error_invite_code_invalid">Invalid invite code</string>
+    <string name="error_invite_code_used">Invite code used</string>
+    <string name="error_invite_code_expired">Invite code expired</string>
+    <string name="error_user_banned">Account banned</string>
+    <string name="error_max_sessions_reached">Max sessions reached</string>
+    <string name="error_session_not_found">Session not found</string>
+    <string name="error_session_timeout">Session timeout, auto-sleep after 30min idle</string>
+    <string name="error_signaling_handshake_failed">Signaling handshake failed</string>
+    <string name="error_webrtc_connection_failed">WebRTC connection failed</string>
+    <string name="error_file_transfer_failed">File transfer failed</string>
+    <string name="error_file_hash_mismatch">File hash mismatch</string>
+    <string name="error_rate_limited">Rate limited</string>
+    <string name="error_invalid_payload">Invalid payload</string>
+    <string name="error_replay_detected">Replay detected</string>
+    <string name="error_internal_error">Internal server error</string>
+    <string name="error_maintenance">Server maintenance</string>
+    <string name="error_network">Network error, check connection</string>
+    <string name="error_unknown">Unknown error</string>
+</resources>

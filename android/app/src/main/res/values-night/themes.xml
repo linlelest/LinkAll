@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LinkALL 深色主题 -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.LinkALL" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowBackground">@color/link_background</item>
+    </style>
+
+    <style name="Theme.LinkALL.Splash" parent="Theme.LinkALL">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

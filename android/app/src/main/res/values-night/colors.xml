@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LinkALL 深色主题颜色覆盖 -->
+<resources>
+    <color name="link_primary">#9ECAFF</color>
+    <color name="link_on_primary">#00325A</color>
+    <color name="link_primary_container">#00497F</color>
+    <color name="link_on_primary_container">#D1E4FF</color>
+
+    <color name="link_secondary">#BEC6DC</color>
+    <color name="link_on_secondary">#283041</color>
+    <color name="link_secondary_container">#3E4759</color>
+    <color name="link_on_secondary_container">#DAE2F9</color>
+
+    <color name="link_background">#1A1C1E</color>
+    <color name="link_on_background">#E3E2E6</color>
+    <color name="link_surface">#1A1C1E</color>
+    <color name="link_on_surface">#E3E2E6</color>
+    <color name="link_surface_variant">#44474F</color>
+    <color name="link_on_surface_variant">#C4C6D0</color>
+
+    <color name="link_error">#FFB4AB</color>
+    <color name="link_on_error">#690005</color>
+    <color name="link_error_container">#93000A</color>
+    <color name="link_on_error_container">#FFDAD6</color>
+
+    <color name="link_outline">#8E9099</color>
+    <color name="link_outline_variant">#44474F</color>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LinkALL 启动闪屏背景：纯品牌色，避免冷启动白屏 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/link_background" />
+    <item android:gravity="center">
+        <bitmap android:src="@drawable/icon" android:gravity="center" />
+    </item>
+</layer-list>

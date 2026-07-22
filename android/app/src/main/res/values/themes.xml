@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LinkALL 主题（浅色基线） -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- 基础应用主题（Material3 Compose 接管，仅保留兼容属性） -->
+    <style name="Theme.LinkALL" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">@color/link_background</item>
+    </style>
+
+    <!-- 启动闪屏主题（避免冷启动白屏） -->
+    <style name="Theme.LinkALL.Splash" parent="Theme.LinkALL">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

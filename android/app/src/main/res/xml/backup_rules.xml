@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 备份规则：LinkALL 不备份任何敏感数据（Token/设备码本地加密存储） -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="linkall_secure.xml" />
+    <exclude domain="file" path="cache/" />
+</full-backup-content>

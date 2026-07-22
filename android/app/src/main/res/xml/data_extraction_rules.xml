@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ 数据提取规则：设备迁移时不携带敏感配置 -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="linkall_secure.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="linkall_secure.xml" />
+    </device-transfer>
+</data-extraction-rules>

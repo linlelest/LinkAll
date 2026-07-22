@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LinkALL 颜色定义（浅色） -->
+<resources>
+    <color name="link_primary">#1E5FB4</color>
+    <color name="link_on_primary">#FFFFFF</color>
+    <color name="link_primary_container">#D1E4FF</color>
+    <color name="link_on_primary_container">#001D36</color>
+
+    <color name="link_secondary">#565E71</color>
+    <color name="link_on_secondary">#FFFFFF</color>
+    <color name="link_secondary_container">#DAE2F9</color>
+    <color name="link_on_secondary_container">#131B2C</color>
+
+    <color name="link_tertiary">#715573</color>
+    <color name="link_on_tertiary">#FFFFFF</color>
+
+    <color name="link_background">#FDFCFF</color>
+    <color name="link_on_background">#1A1C1E</color>
+    <color name="link_surface">#FDFCFF</color>
+    <color name="link_on_surface">#1A1C1E</color>
+    <color name="link_surface_variant">#E0E2EC</color>
+    <color name="link_on_surface_variant">#44474F</color>
+
+    <color name="link_error">#BA1A1A</color>
+    <color name="link_on_error">#FFFFFF</color>
+    <color name="link_error_container">#FFDAD6</color>
+    <color name="link_on_error_container">#410002</color>
+
+    <color name="link_outline">#74777F</color>
+    <color name="link_outline_variant">#C4C6D0</color>
+
+    <!-- 状态色 -->
+    <color name="status_online">#2E7D32</color>
+    <color name="status_offline">#9E9E9E</color>
+    <color name="status_busy">#ED6C02</color>
+    <color name="status_sleeping">#0288D1</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="scrim">#99000000</color>
+</resources>
