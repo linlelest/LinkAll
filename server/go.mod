@@ -3,7 +3,6 @@ module github.com/linlelest/LinkALL/server
 go 1.24
 
 require (
-	github.com/alexedwards/argon2id v0.0.0-20230330094920-5132af8ef8f7
 	github.com/gofiber/adaptor/v2 v2.2.2
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/golang-jwt/jwt/v5 v5.2.1
@@ -11,6 +10,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/joho/godotenv v1.5.1
 	github.com/pion/webrtc/v3 v3.3.2
+	golang.org/x/crypto v0.31.0
 	golang.org/x/term v0.27.0
 	modernc.org/sqlite v1.34.5
 )
@@ -36,7 +36,6 @@ require (
 	github.com/pion/transport/v2 v2.2.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.55.0 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
