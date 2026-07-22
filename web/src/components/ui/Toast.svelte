@@ -13,7 +13,7 @@
 {#if items.length > 0}
   <div class="toast-container" role="region" aria-live="polite">
     {#each items as item (item.id)}
-      <div class="toast" class={item.type}>
+      <div class="toast {item.type}">
         <span class="toast-msg">{item.message}</span>
         <button class="toast-close" onclick={() => dismiss(item.id)} aria-label="close">×</button>
       </div>
