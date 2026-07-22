@@ -40,13 +40,9 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .setup(move |app| {
             // 初始化守护进程状态
-            let daemon_state = match DaemonState::new(event_tx) {
-                Ok(state) => Arc::new(state),
-                Err(e) => {
-                    log::error!("初始化守护进程失败：{:?}", e);
-                    return Err(e.into());
-                }
-            };
+            // new() 即使初始化失败也返回可用的 DaemonState（init_error 记录错误）
+            // 确保 Tauri 的 app.manage() 总能注册成功，命令调用时返回友好错误
+            let daemon_state = Arc::new(DaemonState::new(event_tx));
 
             // 注册 Tauri 托管状态
             app.manage(daemon_state.clone());

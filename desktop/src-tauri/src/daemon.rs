@@ -20,8 +20,8 @@ use crate::webrtc::control::SettingsSnapshot;
 
 /// 守护进程状态
 pub struct DaemonState {
-    /// SQLite 数据库连接
-    db: Mutex<Connection>,
+    /// SQLite 数据库连接（懒加载，初始化失败时为 None）
+    db: Mutex<Option<Connection>>,
     /// 应用配置
     config: Mutex<AppConfig>,
     /// 设备身份
@@ -38,6 +38,8 @@ pub struct DaemonState {
     paused: AtomicBool,
     /// 事件出口（向上层 UI 派发）
     event_tx: mpsc::UnboundedSender<DaemonEvent>,
+    /// 初始化错误（首次 open_db 失败时记录，命令调用时返回）
+    init_error: Mutex<Option<String>>,
 }
 
 /// 守护进程事件
@@ -62,30 +64,74 @@ pub enum DaemonEvent {
 
 impl DaemonState {
     /// 初始化守护进程状态：打开数据库、加载配置、确保设备身份
-    pub fn new(event_tx: mpsc::UnboundedSender<DaemonEvent>) -> Result<Self> {
+    /// 即使初始化失败也返回一个可用的 DaemonState（init_error 记录错误），
+    /// 确保 Tauri 的 app.manage() 总能注册成功，命令调用时返回友好错误。
+    pub fn new(event_tx: mpsc::UnboundedSender<DaemonEvent>) -> Self {
+        // 尝试初始化数据库、配置、设备身份
+        match Self::try_init() {
+            Ok((conn, cfg, dev)) => {
+                log::info!(
+                    "守护进程初始化完成：设备ID={} 服务器={}",
+                    dev.device_id,
+                    cfg.server_url
+                );
+                Self {
+                    db: Mutex::new(Some(conn)),
+                    config: Mutex::new(cfg),
+                    device: Mutex::new(dev),
+                    peer: Mutex::new(None),
+                    capture_stop: Arc::new(AtomicBool::new(false)),
+                    encode_stop: Arc::new(AtomicBool::new(false)),
+                    running: AtomicBool::new(false),
+                    paused: AtomicBool::new(false),
+                    event_tx,
+                    init_error: Mutex::new(None),
+                }
+            }
+            Err(e) => {
+                log::error!("守护进程初始化失败：{:?}", e);
+                log::error!("应用将以降级模式运行，请检查数据目录权限");
+                Self {
+                    db: Mutex::new(None),
+                    config: Mutex::new(AppConfig::default()),
+                    device: Mutex::new(DeviceInfo {
+                        device_id: String::new(),
+                        device_code: String::new(),
+                        owner_user_id: None,
+                    }),
+                    peer: Mutex::new(None),
+                    capture_stop: Arc::new(AtomicBool::new(false)),
+                    encode_stop: Arc::new(AtomicBool::new(false)),
+                    running: AtomicBool::new(false),
+                    paused: AtomicBool::new(false),
+                    event_tx,
+                    init_error: Mutex::new(Some(format!("{:?}", e))),
+                }
+            }
+        }
+    }
+
+    /// 实际初始化逻辑（可能失败）
+    fn try_init() -> Result<(Connection, AppConfig, DeviceInfo)> {
         let conn = config::open_db()?;
         let cfg = config::load_config(&conn)?;
         let dev = device::ensure_device(&conn)?;
-        log::info!(
-            "守护进程初始化完成：设备ID={} 服务器={}",
-            dev.device_id,
-            cfg.server_url
-        );
-        Ok(Self {
-            db: Mutex::new(conn),
-            config: Mutex::new(cfg),
-            device: Mutex::new(dev),
-            peer: Mutex::new(None),
-            capture_stop: Arc::new(AtomicBool::new(false)),
-            encode_stop: Arc::new(AtomicBool::new(false)),
-            running: AtomicBool::new(false),
-            paused: AtomicBool::new(false),
-            event_tx,
-        })
+        Ok((conn, cfg, dev))
+    }
+
+    /// 检查初始化状态，失败时返回错误
+    async fn ensure_init(&self) -> Result<()> {
+        if let Some(err) = self.init_error.lock().await.as_ref() {
+            return Err(anyhow::anyhow!("守护进程初始化失败：{}", err));
+        }
+        Ok(())
     }
 
     /// 启动被控服务
     pub async fn start(&self) -> Result<()> {
+        // 检查初始化状态
+        self.ensure_init().await?;
+
         if self.running.load(Ordering::Relaxed) {
             log::warn!("服务已在运行");
             return Ok(());
@@ -96,8 +142,9 @@ impl DaemonState {
 
         // 获取 JWT 令牌
         let token = {
-            let conn = self.db.lock().await;
-            auth::current_token(&conn)?
+            let db_guard = self.db.lock().await;
+            let conn = db_guard.as_ref().ok_or_else(|| anyhow::anyhow!("数据库未初始化"))?;
+            auth::current_token(conn)?
                 .ok_or_else(|| anyhow::anyhow!("未登录，请先在设置中登录"))?
         };
 
@@ -304,11 +351,13 @@ impl DaemonState {
 
     /// 更新配置
     pub async fn update_config(&self, key: &str, value: &str) -> Result<()> {
-        let conn = self.db.lock().await;
-        config::save_setting(&conn, key, value)?;
+        self.ensure_init().await?;
+        let conn_guard = self.db.lock().await;
+        let conn = conn_guard.as_ref().ok_or_else(|| anyhow::anyhow!("数据库未初始化"))?;
+        config::save_setting(conn, key, value)?;
         // 重新加载配置
-        let new_cfg = config::load_config(&conn)?;
-        drop(conn);
+        let new_cfg = config::load_config(conn)?;
+        drop(conn_guard);
         *self.config.lock().await = new_cfg;
         log::info!("配置已更新：{} = {}", key, value);
         Ok(())
@@ -316,29 +365,35 @@ impl DaemonState {
 
     /// 登录
     pub async fn login(&self, username: &str, password: &str) -> Result<()> {
+        self.ensure_init().await?;
         let cfg = self.config.lock().await;
         let server_url = cfg.server_url.clone();
         drop(cfg);
 
         let login_data = auth::login(&server_url, username, password).await?;
-        let conn = self.db.lock().await;
-        auth::save_credentials(&conn, &login_data)?;
+        let conn_guard = self.db.lock().await;
+        let conn = conn_guard.as_ref().ok_or_else(|| anyhow::anyhow!("数据库未初始化"))?;
+        auth::save_credentials(conn, &login_data)?;
         // 绑定设备归属用户
-        device::bind_owner(&conn, login_data.user.id)?;
+        device::bind_owner(conn, login_data.user.id)?;
         Ok(())
     }
 
     /// 登出
     pub async fn logout(&self) -> Result<()> {
-        let conn = self.db.lock().await;
-        auth::logout(&conn)?;
+        self.ensure_init().await?;
+        let conn_guard = self.db.lock().await;
+        let conn = conn_guard.as_ref().ok_or_else(|| anyhow::anyhow!("数据库未初始化"))?;
+        auth::logout(conn)?;
         Ok(())
     }
 
     /// 重置设备码
     pub async fn reset_device_code(&self) -> Result<String> {
-        let conn = self.db.lock().await;
-        let new_code = device::reset_device_code(&conn)?;
+        self.ensure_init().await?;
+        let conn_guard = self.db.lock().await;
+        let conn = conn_guard.as_ref().ok_or_else(|| anyhow::anyhow!("数据库未初始化"))?;
+        let new_code = device::reset_device_code(conn)?;
         let mut dev = self.device.lock().await;
         dev.device_code = new_code.clone();
         Ok(new_code)
@@ -346,8 +401,10 @@ impl DaemonState {
 
     /// 重置设备编号
     pub async fn reset_device_id(&self) -> Result<String> {
-        let conn = self.db.lock().await;
-        let new_id = device::reset_device_id(&conn)?;
+        self.ensure_init().await?;
+        let conn_guard = self.db.lock().await;
+        let conn = conn_guard.as_ref().ok_or_else(|| anyhow::anyhow!("数据库未初始化"))?;
+        let new_id = device::reset_device_id(conn)?;
         let mut dev = self.device.lock().await;
         dev.device_id = new_id.clone();
         Ok(new_id)
@@ -355,8 +412,10 @@ impl DaemonState {
 
     /// 检查是否已登录且 JWT 有效
     pub async fn is_logged_in(&self) -> Result<bool> {
-        let conn = self.db.lock().await;
-        match auth::load_credentials(&conn)? {
+        self.ensure_init().await?;
+        let conn_guard = self.db.lock().await;
+        let conn = conn_guard.as_ref().ok_or_else(|| anyhow::anyhow!("数据库未初始化"))?;
+        match auth::load_credentials(conn)? {
             Some(c) => Ok(auth::is_token_valid(&c)),
             None => Ok(false),
         }
@@ -364,8 +423,10 @@ impl DaemonState {
 
     /// 获取当前用户信息（从本地凭据读取）
     pub async fn current_user(&self) -> Result<Option<auth::UserInfo>> {
-        let conn = self.db.lock().await;
-        match auth::load_credentials(&conn)? {
+        self.ensure_init().await?;
+        let conn_guard = self.db.lock().await;
+        let conn = conn_guard.as_ref().ok_or_else(|| anyhow::anyhow!("数据库未初始化"))?;
+        match auth::load_credentials(conn)? {
             Some(c) if auth::is_token_valid(&c) => {
                 Ok(Some(auth::UserInfo {
                     id: c.user_id,
