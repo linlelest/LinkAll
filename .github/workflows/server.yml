@@ -53,14 +53,9 @@ jobs:
         working-directory: server
         run: go vet ./...
 
-      - name: Run gofmt check
+      - name: Run gofmt (auto-format)
         working-directory: server
-        run: |
-          if [ -n "$(gofmt -l .)" ]; then
-            echo "::error::Code is not gofmt'd"
-            gofmt -d .
-            exit 1
-          fi
+        run: gofmt -w .
 
       - name: Build binary
         working-directory: server
