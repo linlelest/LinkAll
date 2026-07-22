@@ -1,0 +1,45 @@
+# Go
+server/bin/
+server/data/
+server/*.exe
+server/remote-server
+server/remote-server.exe
+server/.env
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Node / Web
+web/node_modules/
+web/dist/
+web/.svelte-kit/
+web/build/
+
+# Tauri / Rust
+desktop/src-tauri/target/
+desktop/node_modules/
+desktop/dist/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/release/
+android/app/debug/
+*.apk
+*.aab
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CI artifacts
+artifacts/

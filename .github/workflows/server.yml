@@ -1,0 +1,108 @@
+name: Server CI (Go)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server.yml'
+
+jobs:
+  build:
+    name: Build (${{ matrix.goos }}-${{ matrix.goarch }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            binary: remote-server-linux-amd64
+          - goos: windows
+            goarch: amd64
+            binary: remote-server-windows-amd64.exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+          cache-dependency-path: server/go.sum
+
+      - name: Download dependencies
+        working-directory: server
+        run: go mod download
+
+      - name: Verify dependencies
+        working-directory: server
+        run: go mod verify
+
+      - name: Run go vet
+        working-directory: server
+        run: go vet ./...
+
+      - name: Run gofmt check
+        working-directory: server
+        run: |
+          if [ -n "$(gofmt -l .)" ]; then
+            echo "::error::Code is not gofmt'd"
+            gofmt -d .
+            exit 1
+          fi
+
+      - name: Build binary
+        working-directory: server
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          go build \
+            -trimpath \
+            -ldflags="-s -w -X main.appVersion=0.1.0" \
+            -o ${{ matrix.binary }} \
+            ./cmd
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.binary }}
+          path: server/${{ matrix.binary }}
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Show binary size
+        if: always()
+        working-directory: server
+        run: |
+          if [ -f "${{ matrix.binary }}" ]; then
+            ls -lh ${{ matrix.binary }}
+            echo "目标体积 <15MB"
+          fi
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go 1.24
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+          cache-dependency-path: server/go.sum
+
+      - name: Run tests
+        working-directory: server
+        run: go test -v -race -count=1 ./...

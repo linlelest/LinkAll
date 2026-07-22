@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/linlelest/LinkALL/shared/errors.json",
+  "title": "LinkALL 错误码定义",
+  "description": "全端统一的错误码定义。每条包含 code（程序用）、http（对应 HTTP 状态）、i18nKey（i18n 字符串键）、description（开发者说明）。",
+  "type": "object",
+  "errors": {
+    "ERR_OK": {
+      "http": 200,
+      "i18nKey": "error.ok",
+      "description": "成功"
+    },
+    "ERR_AUTH_FAILED": {
+      "http": 401,
+      "i18nKey": "error.auth_failed",
+      "description": "认证失败：用户名或密码错误"
+    },
+    "ERR_AUTH_EXPIRED": {
+      "http": 401,
+      "i18nKey": "error.auth_expired",
+      "description": "认证已过期，请重新登录"
+    },
+    "ERR_PERMISSION_DENIED": {
+      "http": 403,
+      "i18nKey": "error.permission_denied",
+      "description": "权限不足"
+    },
+    "ERR_DEVICE_NOT_FOUND": {
+      "http": 404,
+      "i18nKey": "error.device_not_found",
+      "description": "设备未找到"
+    },
+    "ERR_DEVICE_OFFLINE": {
+      "http": 409,
+      "i18nKey": "error.device_offline",
+      "description": "设备离线"
+    },
+    "ERR_DEVICE_BUSY": {
+      "http": 409,
+      "i18nKey": "error.device_busy",
+      "description": "设备忙（已有控制端连接）"
+    },
+    "ERR_DEVICE_CODE_INVALID": {
+      "http": 401,
+      "i18nKey": "error.device_code_invalid",
+      "description": "设备码错误"
+    },
+    "ERR_INVITE_CODE_INVALID": {
+      "http": 400,
+      "i18nKey": "error.invite_code_invalid",
+      "description": "邀请码无效"
+    },
+    "ERR_INVITE_CODE_USED": {
+      "http": 400,
+      "i18nKey": "error.invite_code_used",
+      "description": "邀请码已被使用"
+    },
+    "ERR_INVITE_CODE_EXPIRED": {
+      "http": 400,
+      "i18nKey": "error.invite_code_expired",
+      "description": "邀请码已过期"
+    },
+    "ERR_USER_BANNED": {
+      "http": 403,
+      "i18nKey": "error.user_banned",
+      "description": "账号已被封禁"
+    },
+    "ERR_MAX_SESSIONS_REACHED": {
+      "http": 429,
+      "i18nKey": "error.max_sessions_reached",
+      "description": "已达最大并发会话数"
+    },
+    "ERR_SESSION_NOT_FOUND": {
+      "http": 404,
+      "i18nKey": "error.session_not_found",
+      "description": "会话不存在"
+    },
+    "ERR_SESSION_TIMEOUT": {
+      "http": 408,
+      "i18nKey": "error.session_timeout",
+      "description": "会话超时（30 分钟无操作自动休眠）"
+    },
+    "ERR_SIGNALING_HANDSHAKE_FAILED": {
+      "http": 500,
+      "i18nKey": "error.signaling_handshake_failed",
+      "description": "信令握手失败"
+    },
+    "ERR_WEBRTC_CONNECTION_FAILED": {
+      "http": 502,
+      "i18nKey": "error.webrtc_connection_failed",
+      "description": "WebRTC 连接建立失败"
+    },
+    "ERR_FILE_TRANSFER_FAILED": {
+      "http": 500,
+      "i18nKey": "error.file_transfer_failed",
+      "description": "文件传输失败"
+    },
+    "ERR_FILE_HASH_MISMATCH": {
+      "http": 422,
+      "i18nKey": "error.file_hash_mismatch",
+      "description": "文件哈希校验失败"
+    },
+    "ERR_RATE_LIMITED": {
+      "http": 429,
+      "i18nKey": "error.rate_limited",
+      "description": "请求过于频繁，已限流"
+    },
+    "ERR_INVALID_PAYLOAD": {
+      "http": 400,
+      "i18nKey": "error.invalid_payload",
+      "description": "请求体格式错误"
+    },
+    "ERR_REPLAY_DETECTED": {
+      "http": 401,
+      "i18nKey": "error.replay_detected",
+      "description": "检测到消息重放（时间戳过期或重复）"
+    },
+    "ERR_INTERNAL_ERROR": {
+      "http": 500,
+      "i18nKey": "error.internal_error",
+      "description": "服务器内部错误"
+    },
+    "ERR_MAINTENANCE": {
+      "http": 503,
+      "i18nKey": "error.maintenance",
+      "description": "服务器维护中"
+    }
+  }
+}

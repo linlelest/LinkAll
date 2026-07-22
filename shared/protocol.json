@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/linlelest/LinkALL/shared/protocol.json",
+  "title": "LinkALL 控制指令协议 Schema",
+  "description": "定义 WebRTC DataChannel 上传输的所有控制指令、文件元数据、设置同步、心跳、状态枚举与错误码。各端通过本 Schema 生成强类型结构。",
+  "type": "object",
+  "definitions": {
+    "MessageType": {
+      "type": "string",
+      "description": "消息类型枚举",
+      "enum": [
+        "keyboard",
+        "mouse",
+        "wheel",
+        "file_meta",
+        "file_chunk",
+        "file_ack",
+        "file_complete",
+        "settings_sync",
+        "heartbeat",
+        "heartbeat_ack",
+        "status",
+        "error",
+        "auth",
+        "auth_ack",
+        "screen_config",
+        "privacy_screen",
+        "clipboard"
+      ]
+    },
+    "Platform": {
+      "type": "string",
+      "description": "客户端平台枚举",
+      "enum": ["windows", "linux", "android", "web", "unknown"]
+    },
+    "DeviceStatus": {
+      "type": "string",
+      "description": "设备在线状态枚举",
+      "enum": ["offline", "online", "busy", "sleeping"]
+    },
+    "SessionStatus": {
+      "type": "string",
+      "description": "会话状态枚举",
+      "enum": ["active", "sleeping", "closed", "timeout", "pending"]
+    },
+    "ConnectionMode": {
+      "type": "string",
+      "description": "连接模式枚举",
+      "enum": ["anonymous", "same_account", "device_code"]
+    },
+    "KeyCode": {
+      "type": "string",
+      "description": "USB HID 键码名称（参考 HID Usage Table 0x07）",
+      "examples": [
+        "KeyA", "KeyB", "Space", "Enter", "Escape",
+        "ShiftLeft", "ControlLeft", "AltLeft", "MetaLeft",
+        "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"
+      ]
+    },
+    "MouseButton": {
+      "type": "string",
+      "description": "鼠标按键枚举",
+      "enum": ["left", "right", "middle", "back", "forward"]
+    },
+    "MouseAction": {
+      "type": "string",
+      "description": "鼠标动作枚举",
+      "enum": ["move", "down", "up", "click", "double_click"]
+    },
+    "ErrorCode": {
+      "type": "string",
+      "description": "错误码枚举（详见 errors.json）",
+      "enum": [
+        "ERR_OK",
+        "ERR_AUTH_FAILED",
+        "ERR_AUTH_EXPIRED",
+        "ERR_PERMISSION_DENIED",
+        "ERR_DEVICE_NOT_FOUND",
+        "ERR_DEVICE_OFFLINE",
+        "ERR_DEVICE_BUSY",
+        "ERR_DEVICE_CODE_INVALID",
+        "ERR_INVITE_CODE_INVALID",
+        "ERR_INVITE_CODE_USED",
+        "ERR_INVITE_CODE_EXPIRED",
+        "ERR_USER_BANNED",
+        "ERR_MAX_SESSIONS_REACHED",
+        "ERR_SESSION_NOT_FOUND",
+        "ERR_SESSION_TIMEOUT",
+        "ERR_SIGNALING_HANDSHAKE_FAILED",
+        "ERR_WEBRTC_CONNECTION_FAILED",
+        "ERR_FILE_TRANSFER_FAILED",
+        "ERR_FILE_HASH_MISMATCH",
+        "ERR_RATE_LIMITED",
+        "ERR_INVALID_PAYLOAD",
+        "ERR_REPLAY_DETECTED",
+        "ERR_INTERNAL_ERROR",
+        "ERR_MAINTENANCE"
+      ]
+    },
+    "Envelope": {
+      "type": "object",
+      "description": "消息外层信封：所有 DataChannel / WebSocket 控制消息都包裹在此结构中",
+      "required": ["type", "ts", "seq"],
+      "properties": {
+        "type": { "$ref": "#/definitions/MessageType" },
+        "ts": {
+          "type": "integer",
+          "description": "发送时间戳（Unix 毫秒），用于防重放"
+        },
+        "seq": {
+          "type": "integer",
+          "description": "消息序列号，单调递增，用于丢包检测与去重"
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "会话 ID（UUIDv4），与设备会话绑定"
+        },
+        "payload": {
+          "description": "消息体，结构由 type 决定（见下方 oneOf）"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "messages": {
+      "type": "array",
+      "description": "所有受支持的消息类型定义",
+      "items": {
+        "type": "object",
+        "required": ["type", "payloadSchema"],
+        "properties": {
+          "type": { "$ref": "#/definitions/MessageType" },
+          "payloadSchema": {
+            "oneOf": [
+              {
+                "description": "keyboard 键盘事件",
+                "type": "object",
+                "required": ["key", "action"],
+                "properties": {
+                  "key": { "$ref": "#/definitions/KeyCode" },
+                  "action": {
+                    "type": "string",
+                    "enum": ["down", "up", "press"]
+                  },
+                  "modifiers": {
+                    "type": "array",
+                    "description": "同时按下的修饰键",
+                    "items": { "$ref": "#/definitions/KeyCode" },
+                    "default": []
+                  }
+                }
+              },
+              {
+                "description": "mouse 鼠标事件",
+                "type": "object",
+                "required": ["action"],
+                "properties": {
+                  "action": { "$ref": "#/definitions/MouseAction" },
+                  "button": { "$ref": "#/definitions/MouseButton" },
+                  "x": { "type": "integer", "description": "绝对 X 坐标（屏幕像素）" },
+                  "y": { "type": "integer", "description": "绝对 Y 坐标（屏幕像素）" },
+                  "dx": { "type": "integer", "description": "相对 X 偏移（移动时使用）" },
+                  "dy": { "type": "integer", "description": "相对 Y 偏移（移动时使用）" }
+                }
+              },
+              {
+                "description": "wheel 滚轮事件",
+                "type": "object",
+                "required": ["deltaY"],
+                "properties": {
+                  "deltaX": { "type": "integer", "description": "水平滚动量（默认 0）" },
+                  "deltaY": { "type": "integer", "description": "垂直滚动量（正=向下，负=向上）" }
+                }
+              },
+              {
+                "description": "file_meta 文件传输元数据（开始传输前握手）",
+                "type": "object",
+                "required": ["transferId", "name", "size", "hash"],
+                "properties": {
+                  "transferId": { "type": "string", "description": "传输任务 ID（UUIDv4）" },
+                  "name": { "type": "string", "description": "文件名" },
+                  "size": { "type": "integer", "description": "文件总字节数" },
+                  "hash": { "type": "string", "description": "SHA-256 文件哈希（Hex）" },
+                  "direction": { "type": "string", "enum": ["upload", "download"] },
+                  "remotePath": { "type": "string", "description": "目标路径（被控端文件系统）" },
+                  "chunkSize": { "type": "integer", "description": "分片大小（默认 262144，上限 256KB）", "default": 262144 }
+                }
+              },
+              {
+                "description": "file_chunk 文件分片数据",
+                "type": "object",
+                "required": ["transferId", "chunkId", "offset", "data"],
+                "properties": {
+                  "transferId": { "type": "string" },
+                  "chunkId": { "type": "integer", "description": "分片序号，从 0 开始" },
+                  "offset": { "type": "integer", "description": "字节偏移量，用于校验" },
+                  "data": { "type": "string", "description": "Base64 编码的分片二进制数据" }
+                }
+              },
+              {
+                "description": "file_ack 分片确认（接收方反馈）",
+                "type": "object",
+                "required": ["transferId", "chunkId", "ok"],
+                "properties": {
+                  "transferId": { "type": "string" },
+                  "chunkId": { "type": "integer" },
+                  "ok": { "type": "boolean", "description": "true=已收到并校验通过，false=请求重传" }
+                }
+              },
+              {
+                "description": "file_complete 传输完成",
+                "type": "object",
+                "required": ["transferId", "ok"],
+                "properties": {
+                  "transferId": { "type": "string" },
+                  "ok": { "type": "boolean", "description": "true=哈希校验通过，false=校验失败" },
+                  "hash": { "type": "string", "description": "接收方计算得到的 SHA-256 哈希" }
+                }
+              },
+              {
+                "description": "settings_sync 设置同步",
+                "type": "object",
+                "required": ["category"],
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "enum": ["screen", "codec", "network", "control", "security"]
+                  },
+                  "screen": {
+                    "type": "object",
+                    "properties": {
+                      "scale": { "type": "number", "description": "缩放比例 0.1~3.0" },
+                      "fps": { "type": "integer", "enum": [15, 30, 45, 60, 75, 90, 105, 120, 135, 144] },
+                      "maxBitrate": { "type": "integer", "description": "码率上限 bps（512000~200000000）" }
+                    }
+                  },
+                  "codec": {
+                    "type": "object",
+                    "properties": {
+                      "video": { "type": "string", "enum": ["H264", "VP8", "VP9", "AV1"] },
+                      "audio": { "type": "string", "enum": ["Opus", "AAC"] }
+                    }
+                  },
+                  "control": {
+                    "type": "object",
+                    "properties": {
+                      "privacyScreen": { "type": "boolean", "description": "防窥屏开关" },
+                      "clipboardSync": { "type": "boolean" }
+                    }
+                  }
+                }
+              },
+              {
+                "description": "heartbeat 心跳",
+                "type": "object",
+                "required": ["clientTs"],
+                "properties": {
+                  "clientTs": { "type": "integer", "description": "客户端发送时间戳（毫秒）" }
+                }
+              },
+              {
+                "description": "heartbeat_ack 心跳响应",
+                "type": "object",
+                "required": ["serverTs", "rtt"],
+                "properties": {
+                  "serverTs": { "type": "integer", "description": "服务端接收时间戳（毫秒）" },
+                  "rtt": { "type": "integer", "description": "已测量的往返延迟（毫秒）" }
+                }
+              },
+              {
+                "description": "status 状态上报（RTT/丢包/码率/帧率/编解码/连接时长）",
+                "type": "object",
+                "required": ["rtt"],
+                "properties": {
+                  "rtt": { "type": "integer", "description": "往返延迟（毫秒）" },
+                  "packetLoss": { "type": "number", "description": "丢包率（0.0~1.0）" },
+                  "bitrate": { "type": "integer", "description": "当前码率 bps" },
+                  "fps": { "type": "integer", "description": "当前帧率" },
+                  "codec": { "type": "string", "description": "当前编解码格式" },
+                  "duration": { "type": "integer", "description": "连接时长（秒）" }
+                }
+              },
+              {
+                "description": "error 错误消息",
+                "type": "object",
+                "required": ["code"],
+                "properties": {
+                  "code": { "$ref": "#/definitions/ErrorCode" },
+                  "message": { "type": "string", "description": "人类可读的错误描述（已本地化）" },
+                  "details": { "type": "object", "description": "附加错误上下文" }
+                }
+              },
+              {
+                "description": "auth 连接鉴权握手",
+                "type": "object",
+                "required": ["deviceId", "mode"],
+                "properties": {
+                  "deviceId": { "type": "string", "description": "12 位设备编号" },
+                  "mode": { "$ref": "#/definitions/ConnectionMode" },
+                  "deviceCode": { "type": "string", "description": "设备码（mode=device_code 时必填）" },
+                  "token": { "type": "string", "description": "JWT（mode=same_account 时必填）" },
+                  "clientTs": { "type": "integer" }
+                }
+              },
+              {
+                "description": "auth_ack 鉴权响应",
+                "type": "object",
+                "required": ["ok"],
+                "properties": {
+                  "ok": { "type": "boolean" },
+                  "code": { "$ref": "#/definitions/ErrorCode" },
+                  "sessionId": { "type": "string", "description": "成功时返回的会话 ID" }
+                }
+              },
+              {
+                "description": "screen_config 屏幕配置",
+                "type": "object",
+                "required": ["width", "height"],
+                "properties": {
+                  "width": { "type": "integer" },
+                  "height": { "type": "integer" },
+                  "scale": { "type": "number" },
+                  "primary": { "type": "boolean" }
+                }
+              },
+              {
+                "description": "privacy_screen 防窥屏指令",
+                "type": "object",
+                "required": ["enabled"],
+                "properties": {
+                  "enabled": { "type": "boolean", "description": "true=开启黑屏，false=恢复" }
+                }
+              },
+              {
+                "description": "clipboard 剪贴板同步",
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": { "type": "string" }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

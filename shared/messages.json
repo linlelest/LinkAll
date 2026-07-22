@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/linlelest/LinkALL/shared/messages.json",
+  "title": "LinkALL 消息类型定义（WebSocket 信令通道）",
+  "description": "定义 WebSocket 信令通道（非 DataChannel 控制指令）上传输的消息类型：SDP/ICE 交换、连接请求、心跳、会话管理。控制指令的 schema 见 protocol.json。",
+  "type": "object",
+  "definitions": {
+    "SignalingType": {
+      "type": "string",
+      "enum": [
+        "connect",
+        "connect_ack",
+        "sdp_offer",
+        "sdp_answer",
+        "ice_candidate",
+        "ice_complete",
+        "bye",
+        "ping",
+        "pong",
+        "error"
+      ]
+    },
+    "Envelope": {
+      "type": "object",
+      "required": ["type", "ts"],
+      "properties": {
+        "type": { "$ref": "#/definitions/SignalingType" },
+        "ts": { "type": "integer", "description": "发送时间戳（Unix 毫秒）" },
+        "sessionId": { "type": "string", "description": "会话 ID（UUIDv4）" },
+        "from": { "type": "string", "description": "发送方标识（controller / device）" },
+        "to": { "type": "string", "description": "接收方设备编号" }
+      }
+    }
+  },
+  "messages": {
+    "connect": {
+      "description": "控制端发起连接请求（含设备编号与鉴权信息）",
+      "required": ["deviceId", "mode"],
+      "properties": {
+        "deviceId": { "type": "string", "description": "12 位设备编号" },
+        "mode": {
+          "type": "string",
+          "enum": ["anonymous", "same_account", "device_code"]
+        },
+        "token": { "type": "string", "description": "JWT（same_account 模式）" },
+        "deviceCode": { "type": "string", "description": "设备码（device_code 模式）" }
+      }
+    },
+    "connect_ack": {
+      "description": "被控端对连接请求的响应",
+      "required": ["ok"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "code": { "type": "string", "description": "错误码（详见 errors.json）" },
+        "sessionId": { "type": "string", "description": "成功时返回的会话 ID" },
+        "requireConfirm": { "type": "boolean", "description": "true=需被控端用户手动确认（匿名模式）" }
+      }
+    },
+    "sdp_offer": {
+      "description": "SDP offer（控制端→被控端）",
+      "required": ["sdp"],
+      "properties": {
+        "sdp": {
+          "type": "object",
+          "required": ["type", "sdp"],
+          "properties": {
+            "type": { "type": "string", "enum": ["offer"] },
+            "sdp": { "type": "string" }
+          }
+        }
+      }
+    },
+    "sdp_answer": {
+      "description": "SDP answer（被控端→控制端）",
+      "required": ["sdp"],
+      "properties": {
+        "sdp": {
+          "type": "object",
+          "required": ["type", "sdp"],
+          "properties": {
+            "type": { "type": "string", "enum": ["answer"] },
+            "sdp": { "type": "string" }
+          }
+        }
+      }
+    },
+    "ice_candidate": {
+      "description": "ICE candidate 转发",
+      "required": ["candidate"],
+      "properties": {
+        "candidate": {
+          "type": "object",
+          "properties": {
+            "candidate": { "type": "string" },
+            "sdpMid": { "type": "string" },
+            "sdpMLineIndex": { "type": "integer" },
+            "usernameFragment": { "type": "string" }
+          }
+        }
+      }
+    },
+    "ice_complete": {
+      "description": "ICE 收集完成通知",
+      "properties": {}
+    },
+    "bye": {
+      "description": "会话结束通知",
+      "properties": {
+        "reason": { "type": "string", "description": "结束原因" }
+      }
+    },
+    "ping": {
+      "description": "WebSocket 心跳（15 秒间隔）",
+      "properties": {
+        "clientTs": { "type": "integer" }
+      }
+    },
+    "pong": {
+      "description": "WebSocket 心跳响应",
+      "required": ["serverTs"],
+      "properties": {
+        "serverTs": { "type": "integer" },
+        "rtt": { "type": "integer", "description": "已测量的往返延迟（毫秒）" }
+      }
+    },
+    "error": {
+      "description": "信令错误消息",
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "description": "错误码（详见 errors.json）" },
+        "message": { "type": "string" }
+      }
+    }
+  },
+  "heartbeat": {
+    "intervalMs": 15000,
+    "description": "WebSocket 心跳间隔（15 秒）"
+  },
+  "reconnect": {
+    "strategy": "exponential_backoff",
+    "initialDelayMs": 1000,
+    "multiplier": 2,
+    "maxDelayMs": 30000,
+    "description": "断线指数退避重连：1s→2s→4s→…→max 30s"
+  },
+  "session": {
+    "timeoutMs": 1800000,
+    "description": "会话超时阈值（30 分钟无操作自动休眠）"
+  }
+}
