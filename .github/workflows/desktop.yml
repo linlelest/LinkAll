@@ -63,6 +63,8 @@ jobs:
             libssl-dev \
             libglib2.0-dev \
             libxcb1-dev \
+            libxcb-randr0-dev \
+            libxcb-shm0-dev \
             libxrandr-dev \
             libxfixes-dev \
             libxi-dev \
