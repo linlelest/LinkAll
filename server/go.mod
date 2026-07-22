@@ -3,7 +3,7 @@ module github.com/linlelest/LinkALL/server
 go 1.24
 
 require (
-	github.com/gofiber/adaptor/v2 v2.2.2
+	github.com/gofiber/adaptor/v2 v2.2.1
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
