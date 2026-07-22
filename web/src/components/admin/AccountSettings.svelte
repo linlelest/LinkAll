@@ -141,7 +141,7 @@
 </script>
 
 <div class="account-page">
-  {/* 修改密码 */}
+  <!-- 修改密码 -->
   <section class="card section">
     <h3 class="section-title">{t('settings.change_password')}</h3>
     <div class="form-grid">
@@ -165,7 +165,7 @@
     </div>
   </section>
 
-  {/* 邀请码 */}
+  <!-- 邀请码 -->
   {#if authStore.isAdmin}
     <section class="card section">
       <div class="section-header">
@@ -207,7 +207,7 @@
     </section>
   {/if}
 
-  {/* 公告折叠面板 */}
+  <!-- 公告折叠面板 -->
   <section class="card section">
     <h3 class="section-title">{t('announcements.title')}</h3>
     {#if announcements.length === 0}
@@ -231,7 +231,7 @@
     {/if}
   </section>
 
-  {/* 语言切换 */}
+  <!-- 语言切换 -->
   <section class="card section">
     <h3 class="section-title">{t('settings.language')}</h3>
     <div class="lang-row">
