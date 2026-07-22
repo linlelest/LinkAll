@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"io/fs"
-	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/linlelest/LinkALL/server/migrations"
 )
 
 // migrationsTableName 记录已执行迁移的元表名。
@@ -27,16 +27,18 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 	return err
 }
 
-// RunMigrations 执行 migrationsDir 下所有 .sql 文件（按文件名升序）。
+// RunMigrations 执行嵌入的 .sql 迁移文件（按文件名升序）。
 // 每个文件作为一个事务，失败则回滚。已执行的不再重复执行。
-func RunMigrations(db *sql.DB, migrationsDir string) error {
+// migrationsDir 参数保留用于兼容，实际从 embed.FS 读取。
+func RunMigrations(db *sql.DB, _ string) error {
 	if err := ensureMigrationsTable(db); err != nil {
 		return fmt.Errorf("创建迁移元表失败: %w", err)
 	}
 
-	entries, err := os.ReadDir(migrationsDir)
+	// 从嵌入的 embed.FS 读取所有 .sql 文件
+	entries, err := fs.ReadDir(migrations.FS, ".")
 	if err != nil {
-		return fmt.Errorf("读取迁移目录 %s 失败: %w", migrationsDir, err)
+		return fmt.Errorf("读取嵌入迁移文件失败: %w", err)
 	}
 
 	// 收集所有 .sql 文件，按文件名升序
@@ -60,7 +62,7 @@ func RunMigrations(db *sql.DB, migrationsDir string) error {
 		if _, ok := applied[version]; ok {
 			continue
 		}
-		if err := applyMigration(db, migrationsDir, f.Name(), version); err != nil {
+		if err := applyMigration(db, f.Name(), version); err != nil {
 			return fmt.Errorf("执行迁移 %s 失败: %w", f.Name(), err)
 		}
 	}
@@ -85,10 +87,9 @@ func listApplied(db *sql.DB) (map[string]bool, error) {
 	return out, rows.Err()
 }
 
-// applyMigration 读取单个 .sql 文件并按 ";" 切分执行，整体包在一个事务里。
-func applyMigration(db *sql.DB, dir, filename, version string) error {
-	path := filepath.Join(dir, filename)
-	content, err := os.ReadFile(path)
+// applyMigration 从 embed.FS 读取单个 .sql 文件并按 ";" 切分执行，整体包在一个事务里。
+func applyMigration(db *sql.DB, filename, version string) error {
+	content, err := migrations.FS.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("读取迁移文件失败: %w", err)
 	}

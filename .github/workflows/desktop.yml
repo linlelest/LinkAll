@@ -34,10 +34,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Rust 1.85
+      - name: Setup Rust (stable)
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: '1.85'
+          toolchain: 'stable'
           targets: ${{ matrix.target }}
 
       - name: Rust cache
