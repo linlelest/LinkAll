@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/linlelest/LinkALL/server/internal/auth"
 )
 
 // UserListItem 用户列表项。
