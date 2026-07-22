@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "LinkALL",
+  "version": "0.1.0",
+  "identifier": "com.linkall.desktop",
+  "build": {
+    "frontendDist": "../frontend"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "settings",
+        "title": "LinkALL 设置",
+        "width": 420,
+        "height": 640,
+        "resizable": false,
+        "fullscreen": false,
+        "center": true,
+        "theme": "Dark",
+        "visible": true,
+        "decorations": true
+      }
+    ],
+    "trayIcon": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": false,
+      "tooltip": "LinkALL 桌面被控端"
+    },
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "resources": [
+      "migrations/001_init.sql"
+    ],
+    "publisher": "LinkALL",
+    "category": "Utility",
+    "shortDescription": "LinkALL 桌面被控端",
+    "longDescription": "LinkALL 极轻量级跨平台远程控制系统 - 桌面被控端，基于 Tauri 2 + Rust。"
+  }
+}

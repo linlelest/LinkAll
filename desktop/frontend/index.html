@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkALL 设置</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="logo">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300d4aa'%3E%3Cpath d='M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z'/%3E%3C/svg%3E" alt="logo" width="32" height="32">
+                <h1>LinkALL</h1>
+            </div>
+            <span class="version">v0.1.0</span>
+        </header>
+
+        <!-- 账户区域 -->
+        <section class="section" id="account-section">
+            <h2 class="section-title">账户</h2>
+            <div id="account-login" class="login-form">
+                <input type="text" id="username" placeholder="用户名" class="input">
+                <input type="password" id="password" placeholder="密码" class="input">
+                <button id="btn-login" class="btn btn-primary">登录</button>
+            </div>
+            <div id="account-info" class="account-info hidden">
+                <div class="info-row">
+                    <span class="label">用户名</span>
+                    <span id="display-username" class="value">--</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">角色</span>
+                    <span id="display-role" class="value">--</span>
+                </div>
+                <button id="btn-logout" class="btn btn-secondary">登出</button>
+            </div>
+        </section>
+
+        <!-- 设备信息 -->
+        <section class="section">
+            <h2 class="section-title">设备信息</h2>
+            <div class="info-row">
+                <span class="label">设备编号</span>
+                <span id="device-id" class="value mono">--</span>
+                <button class="btn-icon" id="btn-reset-device-id" title="重置设备编号">↻</button>
+            </div>
+            <div class="info-row">
+                <span class="label">设备码</span>
+                <span id="device-code" class="value mono">--</span>
+                <button class="btn-icon" id="btn-reset-device-code" title="重置设备码">↻</button>
+            </div>
+        </section>
+
+        <!-- 服务器设置 -->
+        <section class="section">
+            <h2 class="section-title">服务器</h2>
+            <div class="form-row">
+                <input type="text" id="server-url" placeholder="http://localhost:8080" class="input">
+                <button id="btn-save-server" class="btn btn-small">保存</button>
+            </div>
+        </section>
+
+        <!-- 服务控制 -->
+        <section class="section">
+            <h2 class="section-title">服务控制</h2>
+            <div class="status-row">
+                <span class="status-dot" id="status-dot"></span>
+                <span id="status-text">未运行</span>
+            </div>
+            <div class="button-group">
+                <button id="btn-start" class="btn btn-primary">启动</button>
+                <button id="btn-pause" class="btn btn-secondary" disabled>暂停</button>
+                <button id="btn-stop" class="btn btn-danger" disabled>停止</button>
+            </div>
+        </section>
+
+        <!-- 视频设置 -->
+        <section class="section">
+            <h2 class="section-title">视频设置</h2>
+            <div class="form-row">
+                <label class="label">编码器</label>
+                <select id="codec-video" class="input">
+                    <option value="H264">H.264</option>
+                    <option value="VP8">VP8</option>
+                    <option value="VP9">VP9</option>
+                    <option value="AV1">AV1</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label class="label">帧率</label>
+                <input type="number" id="target-fps" min="1" max="60" value="30" class="input">
+            </div>
+            <div class="form-row">
+                <label class="label">码率 (Mbps)</label>
+                <input type="number" id="max-bitrate" min="1" max="50" value="8" class="input">
+            </div>
+            <div class="form-row">
+                <label class="label">缩放</label>
+                <input type="range" id="scale" min="0.5" max="1.5" step="0.1" value="1.0" class="slider">
+                <span id="scale-value" class="value">1.0x</span>
+            </div>
+            <button id="btn-save-video" class="btn btn-small">保存视频设置</button>
+        </section>
+
+        <!-- 系统设置 -->
+        <section class="section">
+            <h2 class="section-title">系统</h2>
+            <div class="form-row">
+                <label class="label">开机自启</label>
+                <label class="switch">
+                    <input type="checkbox" id="autostart-toggle">
+                    <span class="slider-toggle"></span>
+                </label>
+            </div>
+        </section>
+
+        <!-- 底部状态栏 -->
+        <footer class="footer">
+            <span id="footer-status">就绪</span>
+        </footer>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

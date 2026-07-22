@@ -1,0 +1,14 @@
+{
+  "name": "linkall-desktop",
+  "version": "0.1.0",
+  "description": "LinkALL 桌面被控端 - Tauri 2 + Rust",
+  "private": true,
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}
