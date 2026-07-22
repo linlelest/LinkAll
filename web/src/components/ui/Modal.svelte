@@ -4,8 +4,8 @@
     open = $bindable(false),
     title = '',
     onClose = undefined as (() => void) | undefined,
-    children = $props(),
-    footer = $props(),
+    children,
+    footer,
   }: {
     open: boolean;
     title?: string;

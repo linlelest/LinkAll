@@ -13,6 +13,7 @@
   } from '$lib/webrtc/control';
   import { peerConnection } from '$lib/webrtc/connection-manager';
 
+  let { children }: { children?: import('svelte').Snippet } = $props();
   let videoEl = $state<HTMLVideoElement | null>(null);
   let containerEl = $state<HTMLDivElement | null>(null);
   let stream = $state<MediaStream | null>(null);
@@ -107,7 +108,7 @@
   {/if}
 
   {#if connectionStore.isConnected && isTouchDevice}
-    <slot />
+    {@render children?.()}
   {/if}
 </div>
 
