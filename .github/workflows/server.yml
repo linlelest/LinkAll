@@ -1,3 +1,4 @@
+# Server CI - Go 服务端构建与测试
 name: Server CI (Go)
 
 on:
