@@ -258,7 +258,7 @@
               <button class="md-tool" title="任务列表" onclick={() => linePrefix('- [ ] ')}>☐ 任务</button>
               <button class="md-tool" title="引用" onclick={() => linePrefix('> ')}>“ 引用</button>
               <span class="md-sep"></span>
-              <button class="md-tool" title="代码块" onclick={() => wrap('\n```\n', '\n```\n', '代码')}>{ } 代码块</button>
+              <button class="md-tool" title="代码块" onclick={() => wrap('\n```\n', '\n```\n', '代码')}>{'{ }'} 代码块</button>
               <button class="md-tool" title="分隔线" onclick={() => insert('\n---\n')}>— 分隔</button>
               <button class="md-tool" title="表格" onclick={() => insert('\n| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n| A | B | C |\n')}>▦ 表格</button>
             </div>
