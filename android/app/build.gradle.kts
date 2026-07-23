@@ -33,9 +33,9 @@ android {
             versionNameSuffix = "-debug"
         }
         release {
-            // R8 全开模式
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // 开源软件不启用 R8 混淆/压缩（避免反射调用被裁剪导致闪退）
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
