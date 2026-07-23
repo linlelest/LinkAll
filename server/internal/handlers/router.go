@@ -12,6 +12,7 @@ func RegisterRoutes(app *fiber.App, d *Deps) {
 
 	// --- 公开路由 ---
 	api.Get("/health", d.HealthCheck)
+	api.Get("/security/public-key", d.GetRSAPublicKey) // RSA 公钥（供客户端加密设备码）
 
 	// --- 认证路由 ---
 	authGroup := api.Group("/auth")
@@ -26,8 +27,26 @@ func RegisterRoutes(app *fiber.App, d *Deps) {
 	// --- 公告路由（读取公开，写操作需管理员）---
 	annGroup := api.Group("/announcements")
 	annGroup.Get("", d.ListAnnouncements)
-	annGroup.Get("/:id/read", d.MarkAnnouncementRead) // 简化：GET 即标记已读
+	annGroup.Get("/public-key", d.GetAnnouncementPublicKey) // Ed25519 公钥（供客户端验签）
+	annGroup.Get("/:id/read", d.MarkAnnouncementRead)        // 简化：GET 即标记已读
 	annGroup.Post("/:id/read", d.MarkAnnouncementRead)
+
+	// --- 匿名连接确认路由（公开：被控端用设备码认证）---
+	connectGroup := api.Group("/connect/anonymous")
+	connectGroup.Get("/policy", d.GetAnonymousPolicy)
+	// confirm 路由应用时间戳防重放中间件
+	connectGroup.Post("/confirm", d.ReplayProtection, d.ConfirmAnonymousConnection)
+
+	// --- 崩溃上报路由（公开：客户端崩溃时可能已无 JWT）---
+	api.Post("/crash", d.ReportCrash)
+
+	// --- 设备路由（需登录，同账号设备发现与配对）---
+	deviceGroup := api.Group("/devices")
+	deviceGroup.Use(d.JWT.Middleware())
+	deviceGroup.Get("/discover", d.DiscoverDevices)
+	deviceGroup.Post("/pair", d.PairDevice)
+	deviceGroup.Get("/pairings", d.ListPairings)
+	deviceGroup.Delete("/pairings/:deviceId", d.RevokePairing)
 
 	// --- 管理员路由 ---
 	admin := api.Group("/admin")
@@ -64,6 +83,13 @@ func RegisterRoutes(app *fiber.App, d *Deps) {
 	admin.Post("/announcements", d.CreateAnnouncement)
 	admin.Put("/announcements/:id", d.UpdateAnnouncement)
 	admin.Delete("/announcements/:id", d.DeleteAnnouncement)
+
+	// 匿名连接白名单管理（管理员）
+	admin.Get("/connect/anonymous/whitelist", d.ListAnonymousWhitelist)
+	admin.Delete("/connect/anonymous/whitelist/:ip", d.RemoveAnonymousWhitelist)
+
+	// 崩溃报告查询（管理员）
+	admin.Get("/crash-reports", d.ListCrashReports)
 
 	// --- WebSocket 信令通道 ---
 	// /ws/signaling?token=<JWT>&deviceId=<可选>

@@ -69,7 +69,13 @@ class AuthRepository(
 class AnnouncementRepository(private val api: LinkAllApi, private val storage: SecureStorage) {
     private fun authHeader(): String = "Bearer ${storage.getToken().orEmpty()}"
 
-    suspend fun list(): Result<AnnouncementList> = runCatching { api.getAnnouncements(authHeader()) }
+    suspend fun list(): Result<AnnouncementList> = runCatching {
+        val resp = api.getAnnouncements(authHeader())
+        AnnouncementList(
+            items = resp.data,
+            total = resp.meta?.total ?: resp.data.size
+        )
+    }
     suspend fun markRead(id: Long): Result<Unit> = runCatching { api.markAnnouncementRead(authHeader(), id) }
 }
 

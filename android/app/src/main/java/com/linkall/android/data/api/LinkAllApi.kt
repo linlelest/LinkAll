@@ -1,6 +1,7 @@
 package com.linkall.android.data.api
 
 import com.linkall.android.data.model.AnnouncementList
+import com.linkall.android.data.model.AnnouncementListResponse
 import com.linkall.android.data.model.ApiError
 import com.linkall.android.data.model.AuthResponse
 import com.linkall.android.data.model.ChangePasswordRequest
@@ -47,7 +48,7 @@ interface LinkAllApi {
     // ===== 公告 =====
 
     @GET("api/announcements")
-    suspend fun getAnnouncements(@Header("Authorization") auth: String): AnnouncementList
+    suspend fun getAnnouncements(@Header("Authorization") auth: String): AnnouncementListResponse
 
     @POST("api/announcements/{id}/read")
     suspend fun markAnnouncementRead(

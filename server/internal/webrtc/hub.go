@@ -1,6 +1,7 @@
 package webrtc
 
 import (
+	"database/sql"
 	"sync"
 	"time"
 
@@ -51,17 +52,23 @@ type Hub struct {
 	sessions map[string]*Session             // sessionID -> Session
 	// 反向索引：控制端 clientID -> 其发起的会话列表（一个控制端可发起多个会话）
 	ctrlSessions map[string]map[string]bool
+	// 文件中继管理器（P2P 中继备份 + 传输队列统计）
+	fileRelay *FileRelayManager
 }
 
-// NewHub 创建 Hub。
-func NewHub() *Hub {
+// NewHub 创建 Hub。db 可为 nil（此时断点续传仅存内存）。
+func NewHub(db *sql.DB) *Hub {
 	return &Hub{
 		clients:      make(map[string]*Client),
 		devices:      make(map[string]*Client),
 		sessions:     make(map[string]*Session),
 		ctrlSessions: make(map[string]map[string]bool),
+		fileRelay:    NewFileRelayManager(db),
 	}
 }
+
+// FileRelay 返回文件中继管理器（供 signaling 转发使用）。
+func (h *Hub) FileRelay() *FileRelayManager { return h.fileRelay }
 
 // RegisterClient 注册客户端连接。
 func (h *Hub) RegisterClient(c *Client) {
@@ -158,6 +165,10 @@ func (h *Hub) CloseSession(id string) {
 			if m, ok := h.ctrlSessions[sess.Controller.ID]; ok {
 				delete(m, id)
 			}
+		}
+		// 清理文件传输队列
+		if h.fileRelay != nil {
+			h.fileRelay.ClearSession(id)
 		}
 	}
 }

@@ -10,6 +10,8 @@ import {
   sendHeartbeat,
   setSessionId,
   type ConnectionMode,
+  type Envelope,
+  type MessageType,
 } from './control';
 import { connectionStore } from '$lib/stores/connection';
 import { authStore } from '$lib/stores/auth';
@@ -19,6 +21,44 @@ import { t } from '$lib/i18n';
 let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 let statsTimer: ReturnType<typeof setInterval> | null = null;
 let durationStart = 0;
+
+// === DataChannel 消息分发器 ===
+// 组件可订阅特定消息类型，收到时回调。
+type MessageHandler = (env: Envelope) => void;
+const messageHandlers = new Map<MessageType, Set<MessageHandler>>();
+
+// 订阅 DataChannel 消息（返回取消订阅函数）
+export function subscribeDataChannelMessage(type: MessageType, handler: MessageHandler): () => void {
+  let set = messageHandlers.get(type);
+  if (!set) {
+    set = new Set();
+    messageHandlers.set(type, set);
+  }
+  set.add(handler);
+  return () => {
+    set?.delete(handler);
+  };
+}
+
+// 分发收到的 DataChannel 消息
+function dispatchDataChannelMessage(raw: string): void {
+  try {
+    const env = JSON.parse(raw) as Envelope;
+    if (!env || !env.type) return;
+    const set = messageHandlers.get(env.type);
+    if (set) {
+      for (const h of set) {
+        try {
+          h(env);
+        } catch (e) {
+          console.warn('DataChannel 消息处理异常', e);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('DataChannel 消息解析失败', e);
+  }
+}
 
 // 启动连接流程
 export async function startConnection(deviceId: string, deviceCode: string, mode: ConnectionMode): Promise<void> {
@@ -121,6 +161,9 @@ function buildPeerHandlers(): PeerHandlers {
       sendAuth(connectionStore.deviceId, connectionStore.mode, connectionStore.deviceCode, authStore.token);
       syncAllSettings();
       toast.success(t('control.connected'));
+    },
+    onDataChannelMessage: (data) => {
+      dispatchDataChannelMessage(data);
     },
     onDataChannelClose: () => {
       cleanup();

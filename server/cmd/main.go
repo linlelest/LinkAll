@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"strings"
@@ -18,7 +19,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	fiberlogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"golang.org/x/term"
 
@@ -26,6 +27,7 @@ import (
 	"github.com/linlelest/LinkALL/server/internal/config"
 	"github.com/linlelest/LinkALL/server/internal/db"
 	"github.com/linlelest/LinkALL/server/internal/handlers"
+	applogger "github.com/linlelest/LinkALL/server/internal/logger"
 	"github.com/linlelest/LinkALL/server/internal/i18n"
 	"github.com/linlelest/LinkALL/server/internal/webrtc"
 )
@@ -317,6 +319,14 @@ func runServer(flags []string) {
 		log.Fatalf("[server] 加载配置失败: %v", err)
 	}
 
+	// 初始化结构化 JSON 日志（log/slog）
+	applogger.Init(cfg.Env)
+	defer func() {
+		// 确保日志刷出
+		_ = os.Stdout.Sync()
+	}()
+	slog.Info("[server] 结构化日志已初始化", "env", cfg.Env)
+
 	// 创建必要目录
 	if err := cfg.EnsureDirs(); err != nil {
 		log.Fatalf("[server] 创建目录失败: %v", err)
@@ -357,14 +367,24 @@ func runServer(flags []string) {
 	inviteMgr := auth.NewInviteManager(database)
 
 	// 创建 WebRTC 信令服务器
-	hub := webrtc.NewHub()
+	hub := webrtc.NewHub(database)
 	iceConfig := &webrtc.ICEConfig{
 		STUNServers:    cfg.STUNServers,
-		TURNServers:    cfg.TURNServers,
+		TURNServers:    cfg.TURNSServers,
 		TURNUsername:   cfg.TURNUsername,
 		TURNCredential: cfg.TURNCredential,
 	}
-	signaling := webrtc.NewSignalingServer(hub, cfg.JWTSecret, iceConfig)
+	signaling := webrtc.NewSignalingServer(hub, cfg.JWTSecret, iceConfig, database)
+
+	// 初始化 RSA 密钥对（用于设备码非对称加密传输），并确保文件权限 0600
+	if err := handlers.EnsureRSAKeyPair(cfg.DataDir); err != nil {
+		log.Printf("[server] 警告: RSA 密钥初始化失败: %v", err)
+	}
+	// 初始化 Ed25519 密钥对（用于公告数字签名），并确保文件权限 0600
+	if err := handlers.EnsureEd25519KeyPair(cfg.DataDir); err != nil {
+		log.Printf("[server] 警告: Ed25519 密钥初始化失败: %v", err)
+	}
+	handlers.EnsureSecureFilePermissions(envFileName, cfg.DataDir)
 
 	// 后台 goroutine：定期清理空闲会话（30 分钟超时）
 	go func() {
@@ -392,8 +412,10 @@ func runServer(flags []string) {
 
 	// 中间件
 	app.Use(recover.New())
-	app.Use(logger.New(logger.Config{
-		Format: "${time} [${status}] ${method} ${path} (${latency})\n",
+	app.Use(fiberlogger.New(fiberlogger.Config{
+		Format:     `{"time":"${time}","status":${status},"method":"${method}","path":"${path}","latency":"${latency}","ip":"${ip}","ua":"${ua}"}` + "\n",
+		TimeFormat: "2006-01-02T15:04:05.000Z07:00",
+		TimeZone:   "Local",
 	}))
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "*",

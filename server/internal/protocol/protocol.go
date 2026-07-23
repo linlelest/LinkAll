@@ -21,6 +21,13 @@ const (
 	MsgFileChunk     MessageType = "file_chunk"
 	MsgFileAck       MessageType = "file_ack"
 	MsgFileComplete  MessageType = "file_complete"
+	MsgFileResume    MessageType = "file_resume"
+	MsgFileCancel    MessageType = "file_cancel"
+	MsgFileListReq   MessageType = "file_list_request"
+	MsgFileListResp  MessageType = "file_list_response"
+	MsgFileDirReq    MessageType = "file_dir_request"
+	MsgFileDirResp   MessageType = "file_dir_response"
+	MsgFileProgress  MessageType = "file_progress"
 	MsgSettingsSync  MessageType = "settings_sync"
 	MsgHeartbeat     MessageType = "heartbeat"
 	MsgHeartbeatAck  MessageType = "heartbeat_ack"
@@ -119,6 +126,15 @@ const (
 	ErrWebRTCConnectionFailed   ErrorCode = "ERR_WEBRTC_CONNECTION_FAILED"
 	ErrFileTransferFailed       ErrorCode = "ERR_FILE_TRANSFER_FAILED"
 	ErrFileHashMismatch         ErrorCode = "ERR_FILE_HASH_MISMATCH"
+	ErrFileChunkMismatch        ErrorCode = "ERR_FILE_CHUNK_MISMATCH"
+	ErrFileTransferCancelled    ErrorCode = "ERR_FILE_TRANSFER_CANCELLED"
+	ErrFileTransferNotFound     ErrorCode = "ERR_FILE_TRANSFER_NOT_FOUND"
+	ErrFileTransferQuotaExceeded ErrorCode = "ERR_FILE_TRANSFER_QUOTA_EXCEEDED"
+	ErrFileResumeFailed         ErrorCode = "ERR_FILE_RESUME_FAILED"
+	ErrAnnouncementSignatureInvalid ErrorCode = "ERR_ANNOUNCEMENT_SIGNATURE_INVALID"
+	ErrCrashReportInvalid       ErrorCode = "ERR_CRASH_REPORT_INVALID"
+	ErrDevicePairingRequired    ErrorCode = "ERR_DEVICE_PAIRING_REQUIRED"
+	ErrDeviceDiscoverFailed     ErrorCode = "ERR_DEVICE_DISCOVER_FAILED"
 	ErrRateLimited              ErrorCode = "ERR_RATE_LIMITED"
 	ErrInvalidPayload           ErrorCode = "ERR_INVALID_PAYLOAD"
 	ErrReplayDetected           ErrorCode = "ERR_REPLAY_DETECTED"
@@ -193,6 +209,63 @@ type FileCompletePayload struct {
 	TransferID string `json:"transferId"`
 	OK         bool   `json:"ok"`
 	Hash       string `json:"hash,omitempty"`
+}
+
+// FileResumePayload 断点续传请求（接收方告知已接收偏移，发送方从该偏移继续）。
+type FileResumePayload struct {
+	TransferID string `json:"transferId"`
+	Offset     int64  `json:"offset"`
+	ChunkID    int    `json:"chunkId,omitempty"`
+}
+
+// FileCancelPayload 取消传输。
+type FileCancelPayload struct {
+	TransferID string `json:"transferId"`
+	Reason     string `json:"reason,omitempty"`
+}
+
+// FileListRequestPayload 文件列表请求（文件管理器浏览远程目录）。
+type FileListRequestPayload struct {
+	Path string `json:"path"`
+}
+
+// FileEntry 文件条目。
+type FileEntry struct {
+	Name     string `json:"name"`
+	Size     int64  `json:"size"`
+	IsDir    bool   `json:"isDir"`
+	Modified int64  `json:"modified,omitempty"`
+}
+
+// FileListResponsePayload 文件列表响应。
+type FileListResponsePayload struct {
+	Path    string      `json:"path"`
+	Entries []FileEntry `json:"entries"`
+}
+
+// FileDirRequestPayload 目录树请求。
+type FileDirRequestPayload struct {
+	Path  string `json:"path"`
+	Depth int    `json:"depth,omitempty"`
+}
+
+// DirNode 目录树节点。
+type DirNode struct {
+	Name     string    `json:"name"`
+	Path     string    `json:"path"`
+	Children []DirNode `json:"children,omitempty"`
+}
+
+// FileDirResponsePayload 目录树响应。
+type FileDirResponsePayload struct {
+	Tree DirNode `json:"tree"`
+}
+
+// FileProgressPayload 传输进度上报。
+type FileProgressPayload struct {
+	TransferID  string `json:"transferId"`
+	Transferred int64  `json:"transferred"`
+	Speed       int64  `json:"speed,omitempty"`
 }
 
 // SettingsSyncPayload 设置同步。
@@ -300,6 +373,7 @@ const (
 	SigPing        SignalingType = "ping"
 	SigPong        SignalingType = "pong"
 	SigError       SignalingType = "error"
+	SigDCRelay     SignalingType = "dc_relay" // DataChannel 消息中继（P2P 不可达时走信令转发）
 )
 
 // SignalEnvelope 信令消息外层信封。

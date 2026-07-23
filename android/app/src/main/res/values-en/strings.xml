@@ -213,6 +213,10 @@
     <string name="control_files_failed">Failed</string>
     <string name="control_files_paused">Paused</string>
     <string name="control_files_empty">No transfers</string>
+    <string name="control_files_drag">Select files to upload to remote</string>
+    <string name="control_files_pause_btn">Pause</string>
+    <string name="control_files_resume_btn">Resume</string>
+    <string name="control_files_cancel_btn">Cancel</string>
 
     <!-- Status -->
     <string name="status_rtt">RTT</string>

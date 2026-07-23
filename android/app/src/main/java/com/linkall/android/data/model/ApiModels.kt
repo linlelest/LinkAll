@@ -68,17 +68,51 @@ data class ApiError(
 data class Announcement(
     val id: Long,
     val title: String,
-    val content: String = "",
+    @SerialName("contentMd") val contentMd: String = "",
     val pinned: Boolean = false,
-    @SerialName("is_read") val isRead: Boolean = false,
-    @SerialName("published_at") val publishedAt: String = "",
-    val platform: String = "all"
+    val platform: String = "all",
+    @SerialName("versionFilter") val versionFilter: String = "",
+    @SerialName("createdAt") val createdAt: Long = 0,
+    @SerialName("updatedAt") val updatedAt: Long = 0,
+    val signature: String = "",
+    @SerialName("authorId") val authorId: Long = 0,
+    val status: String = "published"
 )
 
 @Serializable
 data class AnnouncementList(
     val items: List<Announcement> = emptyList(),
     val total: Int = 0
+)
+
+/**
+ * 服务端统一响应包装
+ * 格式: {code, message, data, meta}
+ */
+@Serializable
+data class ApiResponse<T>(
+    val code: Int = 0,
+    val message: String = "",
+    val data: T? = null,
+    val meta: ResponseMeta? = null
+)
+
+@Serializable
+data class ResponseMeta(
+    val total: Int = 0,
+    val limit: Int = 0,
+    val offset: Int = 0
+)
+
+/**
+ * 公告列表响应（服务端包装格式 {code, message, data: [...], meta}）
+ */
+@Serializable
+data class AnnouncementListResponse(
+    val code: Int = 0,
+    val message: String = "",
+    val data: List<Announcement> = emptyList(),
+    val meta: ResponseMeta? = null
 )
 
 /**

@@ -21,12 +21,11 @@ use daemon::{DaemonEvent, DaemonState};
 /// 应用入口：初始化日志、数据库、守护进程、托盘，启动 Tauri 事件循环。
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // 初始化日志
-    let _ = env_logger::Builder::from_env(
-        env_logger::Env::default().default_filter_or("info")
-    )
-    .format_timestamp_secs()
-    .try_init();
+    // 初始化日志（写入文件 + 控制台）
+    init_logger();
+
+    // 安装 panic hook：捕获崩溃 backtrace 写入日志文件
+    install_panic_hook();
 
     log::info!("LinkALL 桌面被控端启动中...");
 
@@ -92,7 +91,82 @@ pub fn run() {
             commands::get_autostart,
             commands::get_auth_status,
             commands::get_user_info,
+            commands::export_logs,
         ])
         .run(tauri::generate_context!())
         .expect("运行 Tauri 应用时出错");
+}
+
+/// 初始化日志：同时输出到文件和控制台
+fn init_logger() {
+    use env_logger::{Builder, Target};
+    use std::fs;
+
+    // 日志目录：<data_dir>/LinkALL/logs/
+    let log_dir = dirs::data_dir()
+        .map(|d| d.join("LinkALL").join("logs"))
+        .unwrap_or_else(|| std::path::PathBuf::from("logs"));
+    let _ = fs::create_dir_all(&log_dir);
+    let log_file = log_dir.join("linkall.log");
+
+    let mut builder = Builder::from_env(env_logger::Env::default().default_filter_or("info"));
+    builder.format_timestamp_secs();
+
+    // 尝试打开日志文件作为额外输出目标
+    match fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&log_file)
+    {
+        Ok(file) => {
+            let target = Target::Pipe(Box::new(file));
+            builder.target(target);
+        }
+        Err(e) => {
+            eprintln!("无法打开日志文件 {:?}：{}", log_file, e);
+        }
+    }
+
+    let _ = builder.try_init();
+}
+
+/// 安装 panic hook：捕获崩溃信息并写入日志文件
+fn install_panic_hook() {
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        // 获取 backtrace
+        let backtrace = std::backtrace::Backtrace::force_capture();
+        let payload = info.payload();
+        let payload_str = if let Some(s) = payload.downcast_ref::<&str>() {
+            *s
+        } else if let Some(s) = payload.downcast_ref::<String>() {
+            s.as_str()
+        } else {
+            "<未知 panic 载荷>"
+        };
+        let location = info
+            .location()
+            .map(|l| format!("{}:{}:{}", l.file(), l.line(), l.column()))
+            .unwrap_or_else(|| "<未知位置>".to_string());
+
+        // 写入日志文件
+        let crash_msg = format!(
+            "=== PANIC ===\n位置: {}\n消息: {}\nBacktrace:\n{}\n=============",
+            location, payload_str, backtrace
+        );
+        log::error!("{}", crash_msg);
+
+        // 同时写入崩溃日志文件
+        if let Some(data_dir) = dirs::data_dir() {
+            let crash_path = data_dir.join("LinkALL").join("logs").join("crash.log");
+            let _ = std::fs::write(&crash_path, &format!(
+                "{}\n{}\n",
+                chrono::Local::now().format("%Y-%m-%d %H:%M:%S"),
+                crash_msg
+            ));
+        }
+
+        // 调用默认 hook（打印到 stderr）
+        default_hook(info);
+    }));
 }

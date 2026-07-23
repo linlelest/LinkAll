@@ -13,6 +13,13 @@ export type MessageType =
   | 'file_chunk'
   | 'file_ack'
   | 'file_complete'
+  | 'file_resume'
+  | 'file_cancel'
+  | 'file_list_request'
+  | 'file_list_response'
+  | 'file_dir_request'
+  | 'file_dir_response'
+  | 'file_progress'
   | 'settings_sync'
   | 'heartbeat'
   | 'heartbeat_ack'
@@ -182,6 +189,49 @@ export function sendFileComplete(transferId: string, ok: boolean, hash?: string)
   return send('file_complete', { transferId, ok, hash });
 }
 
+export function sendFileResume(transferId: string, offset: number, chunkId?: number): boolean {
+  return send('file_resume', { transferId, offset, chunkId });
+}
+
+export function sendFileCancel(transferId: string, reason?: string): boolean {
+  return send('file_cancel', { transferId, reason });
+}
+
+// === 文件管理器：远程目录浏览 ===
+
+export interface FileEntry {
+  name: string;
+  size: number;
+  isDir: boolean;
+  modified?: number;
+}
+
+export interface DirNode {
+  name: string;
+  path: string;
+  children?: DirNode[];
+}
+
+export function sendFileListRequest(path: string): boolean {
+  return send('file_list_request', { path });
+}
+
+export function sendFileListResponse(path: string, entries: FileEntry[]): boolean {
+  return send('file_list_response', { path, entries });
+}
+
+export function sendFileDirRequest(path: string, depth?: number): boolean {
+  return send('file_dir_request', { path, depth });
+}
+
+export function sendFileDirResponse(tree: DirNode): boolean {
+  return send('file_dir_response', { tree });
+}
+
+export function sendFileProgress(transferId: string, transferred: number, speed?: number): boolean {
+  return send('file_progress', { transferId, transferred, speed });
+}
+
 export function newTransferId(): string {
   return uuid();
 }
@@ -196,4 +246,24 @@ export async function sha256(buffer: ArrayBuffer): Promise<string> {
   }
   // 降级：返回空，由调用方处理
   return '';
+}
+
+// SHA-256 增量哈希（用于大文件分片校验，避免一次性加载到内存）
+export class IncrementalSha256 {
+  private chunks: Uint8Array[] = [];
+
+  update(data: Uint8Array): void {
+    this.chunks.push(data);
+  }
+
+  async digest(): Promise<string> {
+    const total = this.chunks.reduce((s, c) => s + c.length, 0);
+    const merged = new Uint8Array(total);
+    let offset = 0;
+    for (const c of this.chunks) {
+      merged.set(c, offset);
+      offset += c.length;
+    }
+    return sha256(merged.buffer);
+  }
 }

@@ -15,6 +15,13 @@ enum class MessageType {
     @SerialName("file_chunk") FILE_CHUNK,
     @SerialName("file_ack") FILE_ACK,
     @SerialName("file_complete") FILE_COMPLETE,
+    @SerialName("file_resume") FILE_RESUME,
+    @SerialName("file_cancel") FILE_CANCEL,
+    @SerialName("file_list_request") FILE_LIST_REQUEST,
+    @SerialName("file_list_response") FILE_LIST_RESPONSE,
+    @SerialName("file_dir_request") FILE_DIR_REQUEST,
+    @SerialName("file_dir_response") FILE_DIR_RESPONSE,
+    @SerialName("file_progress") FILE_PROGRESS,
     @SerialName("settings_sync") SETTINGS_SYNC,
     @SerialName("heartbeat") HEARTBEAT,
     @SerialName("heartbeat_ack") HEARTBEAT_ACK,
@@ -264,3 +271,83 @@ data class PrivacyScreenPayload(val enabled: Boolean)
  */
 @Serializable
 data class ClipboardPayload(val text: String)
+
+/**
+ * 文件断点续传请求 payload（接收方告知已接收偏移，发送方从此处续传）
+ */
+@Serializable
+data class FileResumePayload(
+    val transferId: String,
+    val offset: Long,
+    val chunkId: Int = 0
+)
+
+/**
+ * 文件取消传输 payload
+ */
+@Serializable
+data class FileCancelPayload(
+    val transferId: String,
+    val reason: String = ""
+)
+
+/**
+ * 文件列表请求 payload（文件管理器浏览远程目录）
+ */
+@Serializable
+data class FileListRequestPayload(val path: String)
+
+/**
+ * 文件列表响应条目
+ */
+@Serializable
+data class FileEntry(
+    val name: String,
+    val size: Long = 0,
+    val isDir: Boolean = false,
+    val modified: Long = 0
+)
+
+/**
+ * 文件列表响应 payload
+ */
+@Serializable
+data class FileListResponsePayload(
+    val path: String,
+    val entries: List<FileEntry> = emptyList()
+)
+
+/**
+ * 目录树请求 payload（递归列出子目录）
+ */
+@Serializable
+data class FileDirRequestPayload(
+    val path: String,
+    val depth: Int = 2
+)
+
+/**
+ * 目录树节点
+ */
+@Serializable
+data class DirNode(
+    val name: String,
+    val path: String,
+    val children: List<DirNode> = emptyList()
+)
+
+/**
+ * 目录树响应 payload
+ */
+@Serializable
+data class FileDirResponsePayload(val tree: DirNode)
+
+/**
+ * 文件传输进度上报 payload（周期性反馈）
+ */
+@Serializable
+data class FileProgressPayload(
+    val transferId: String,
+    val transferred: Long,
+    val speed: Long = 0
+)

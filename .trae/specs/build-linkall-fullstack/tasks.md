@@ -193,36 +193,36 @@
 
 ## Phase 5 · 集成与高级功能（文件传输、安全、公告、日志）
 
-- [ ] **Task 5.1**：WebRTC DataChannel 文件分片协议
-  - [ ] SubTask 5.1.1：实现分片传输（单包 256KB，分片 ID+偏移量校验）
-  - [ ] SubTask 5.1.2：实现 SHA-256 哈希校验完整性
-  - [ ] SubTask 5.1.3：实现断点续传（记录至本地 DB）与传输队列管理
+- [x] **Task 5.1**：WebRTC DataChannel 文件分片协议
+  - [x] SubTask 5.1.1：实现分片传输（单包 256KB，分片 ID+偏移量校验）
+  - [x] SubTask 5.1.2：实现 SHA-256 哈希校验完整性
+  - [x] SubTask 5.1.3：实现断点续传（记录至本地 DB）与传输队列管理
 
-- [ ] **Task 5.2**：文件管理器 UI（双端）
-  - [ ] SubTask 5.2.1：网页端文件管理器（目录树、上传/下载队列、路径选择、传输统计）
-  - [ ] SubTask 5.2.2：Android 端 SAF 文件管理器完善
+- [x] **Task 5.2**：文件管理器 UI（双端）
+  - [x] SubTask 5.2.1：网页端文件管理器（目录树、上传/下载队列、路径选择、传输统计）
+  - [x] SubTask 5.2.2：Android 端 SAF 文件管理器完善
 
-- [ ] **Task 5.3**：匿名与同账号连接流程
-  - [ ] SubTask 5.3.1：匿名连接流程（编号输入 + 设备端手动确认 单次/永久/拒绝/设备码放行）
-  - [ ] SubTask 5.3.2：同账号连接流程（设备自动发现 + 首次配对确认 + 免密直连）
+- [x] **Task 5.3**：匿名与同账号连接流程
+  - [x] SubTask 5.3.1：匿名连接流程（编号输入 + 设备端手动确认 单次/永久/拒绝/设备码放行）
+  - [x] SubTask 5.3.2：同账号连接流程（设备自动发现 + 首次配对确认 + 免密直连）
 
-- [ ] **Task 5.4**：全局安全策略
-  - [ ] SubTask 5.4.1：匿名/设备码/连接总开关服务端校验与实时同步
-  - [ ] SubTask 5.4.2：自定义服务器地址覆盖逻辑（高级设置热重载）
-  - [ ] SubTask 5.4.3：控制指令带时间戳防重放、设备码/编号非对称加密传输、本地配置 0600 权限
+- [x] **Task 5.4**：全局安全策略
+  - [x] SubTask 5.4.1：匿名/设备码/连接总开关服务端校验与实时同步
+  - [x] SubTask 5.4.2：自定义服务器地址覆盖逻辑（高级设置热重载）
+  - [x] SubTask 5.4.3：控制指令带时间戳防重放、设备码/编号非对称加密传输、本地配置 0600 权限
 
-- [ ] **Task 5.5**：公告系统
-  - [ ] SubTask 5.5.1：服务端 Markdown 解析、富文本编辑工具栏（加粗/斜体/代码块/表格/图片/链接）
-  - [ ] SubTask 5.5.2：多条置顶、按平台/版本推送、阅读状态追踪、数字签名
+- [x] **Task 5.5**：公告系统
+  - [x] SubTask 5.5.1：服务端 Markdown 解析、富文本编辑工具栏（加粗/斜体/代码块/表格/图片/链接）
+  - [x] SubTask 5.5.2：多条置顶、按平台/版本推送、阅读状态追踪、数字签名
 
-- [ ] **Task 5.6**：客户端日志与崩溃上报
-  - [ ] SubTask 5.6.1：客户端分级日志（DEBUG/INFO/WARN/ERROR），一键打包导出
-  - [ ] SubTask 5.6.2：崩溃捕获（Rust backtrace / Android 自研轻量 Crashlytics）上传至 /crash
-  - [ ] SubTask 5.6.3：服务端结构化日志（JSON 格式）
+- [x] **Task 5.6**：客户端日志与崩溃上报
+  - [x] SubTask 5.6.1：客户端分级日志（DEBUG/INFO/WARN/ERROR），一键打包导出
+  - [x] SubTask 5.6.2：崩溃捕获（Rust backtrace / Android 自研轻量 Crashlytics）上传至 /crash
+  - [x] SubTask 5.6.3：服务端结构化日志（JSON 格式）
 
-- [ ] **Task 5.7**：Phase 5 自动 push 触发 CI
-  - [ ] SubTask 5.7.1：commit Phase 5 全部代码
-  - [ ] SubTask 5.7.2：push 至 origin/main，确认 CI workflow 触发并构建成功
+- [x] **Task 5.7**：Phase 5 自动 push 触发 CI
+  - [x] SubTask 5.7.1：commit Phase 5 全部代码
+  - [x] SubTask 5.7.2：push 至 origin/main，确认 CI workflow 触发并构建成功
 
 ---
 

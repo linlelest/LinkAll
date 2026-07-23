@@ -213,6 +213,10 @@
     <string name="control_files_failed">失败</string>
     <string name="control_files_paused">已暂停</string>
     <string name="control_files_empty">暂无传输任务</string>
+    <string name="control_files_drag">选择文件上传到远端</string>
+    <string name="control_files_pause_btn">暂停</string>
+    <string name="control_files_resume_btn">继续</string>
+    <string name="control_files_cancel_btn">取消</string>
 
     <!-- 状态 -->
     <string name="status_rtt">RTT</string>
@@ -290,6 +294,7 @@
     <string name="announcements_read">已读</string>
     <string name="announcements_unread">未读</string>
     <string name="announcements_published_at">发布于 %1$s</string>
+    <string name="announcements_signed">签名验证</string>
 
     <!-- 设备管理 -->
     <string name="devices_title">设备管理</string>

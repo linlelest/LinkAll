@@ -16,6 +16,13 @@
         "file_chunk",
         "file_ack",
         "file_complete",
+        "file_resume",
+        "file_cancel",
+        "file_list_request",
+        "file_list_response",
+        "file_dir_request",
+        "file_dir_response",
+        "file_progress",
         "settings_sync",
         "heartbeat",
         "heartbeat_ack",
@@ -216,6 +223,87 @@
                   "transferId": { "type": "string" },
                   "ok": { "type": "boolean", "description": "true=哈希校验通过，false=校验失败" },
                   "hash": { "type": "string", "description": "接收方计算得到的 SHA-256 哈希" }
+                }
+              },
+              {
+                "description": "file_resume 断点续传请求（接收方告知已接收偏移，发送方从该偏移继续）",
+                "type": "object",
+                "required": ["transferId", "offset"],
+                "properties": {
+                  "transferId": { "type": "string" },
+                  "offset": { "type": "integer", "description": "已接收字节偏移量，发送方从此处续传" },
+                  "chunkId": { "type": "integer", "description": "对应起始分片 ID" }
+                }
+              },
+              {
+                "description": "file_cancel 取消传输",
+                "type": "object",
+                "required": ["transferId"],
+                "properties": {
+                  "transferId": { "type": "string" },
+                  "reason": { "type": "string", "description": "取消原因" }
+                }
+              },
+              {
+                "description": "file_list_request 文件列表请求（文件管理器浏览远程目录）",
+                "type": "object",
+                "required": ["path"],
+                "properties": {
+                  "path": { "type": "string", "description": "要列出的目录路径" }
+                }
+              },
+              {
+                "description": "file_list_response 文件列表响应",
+                "type": "object",
+                "required": ["path", "entries"],
+                "properties": {
+                  "path": { "type": "string" },
+                  "entries": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "size": { "type": "integer" },
+                        "isDir": { "type": "boolean" },
+                        "modified": { "type": "integer", "description": "修改时间戳（秒）" }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "description": "file_dir_request 目录树请求（递归列出子目录）",
+                "type": "object",
+                "required": ["path"],
+                "properties": {
+                  "path": { "type": "string" },
+                  "depth": { "type": "integer", "description": "递归深度（默认 2）", "default": 2 }
+                }
+              },
+              {
+                "description": "file_dir_response 目录树响应",
+                "type": "object",
+                "required": ["tree"],
+                "properties": {
+                  "tree": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "path": { "type": "string" },
+                      "children": { "type": "array" }
+                    }
+                  }
+                }
+              },
+              {
+                "description": "file_progress 传输进度上报（周期性反馈）",
+                "type": "object",
+                "required": ["transferId", "transferred"],
+                "properties": {
+                  "transferId": { "type": "string" },
+                  "transferred": { "type": "integer", "description": "已传输字节数" },
+                  "speed": { "type": "integer", "description": "当前速率（Bps）" }
                 }
               },
               {

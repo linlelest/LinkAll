@@ -1,6 +1,7 @@
 package webrtc
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -103,15 +104,18 @@ type SignalingServer struct {
 	upgrader    websocket.Upgrader
 	jwtSecret   []byte
 	iceConfig   *ICEConfig
+	db          *sql.DB // 用于安全策略校验（可为 nil）
 }
 
 // NewSignalingServer 创建信令服务器。
 // jwtSecret 为空时表示允许匿名连接（被控端通常无需 JWT）。
-func NewSignalingServer(hub *Hub, jwtSecret string, ice *ICEConfig) *SignalingServer {
+// db 用于在 onConnect 时校验全局安全策略（可为 nil，此时跳过校验）。
+func NewSignalingServer(hub *Hub, jwtSecret string, ice *ICEConfig, db *sql.DB) *SignalingServer {
 	return &SignalingServer{
 		hub:       hub,
 		jwtSecret: []byte(jwtSecret),
 		iceConfig: ice,
+		db:        db,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  4096,
 			WriteBufferSize: 4096,
@@ -119,6 +123,38 @@ func NewSignalingServer(hub *Hub, jwtSecret string, ice *ICEConfig) *SignalingSe
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
 	}
+}
+
+// checkSecurityPolicy 校验全局安全策略是否允许指定连接模式。
+// 返回 (allowed, reason)。db 为 nil 时直接放行。
+func (s *SignalingServer) checkSecurityPolicy(mode string) (bool, string) {
+	if s.db == nil {
+		return true, ""
+	}
+	var (
+		allowAnon    int
+		allowDevCode int
+		allowRemote  int
+	)
+	_ = s.db.QueryRow(
+		`SELECT allow_anonymous, allow_device_code, allow_remote_control FROM security_settings WHERE id = 1`,
+	).Scan(&allowAnon, &allowDevCode, &allowRemote)
+	if allowRemote == 0 {
+		return false, "远程控制已被全局禁用"
+	}
+	switch mode {
+	case "anonymous":
+		if allowAnon == 0 {
+			return false, "匿名连接已被禁用"
+		}
+	case "device_code":
+		if allowDevCode == 0 {
+			return false, "设备码连接已被禁用"
+		}
+	case "same_account":
+		// 同账号连接始终允许（已通过 JWT 认证）
+	}
+	return true, ""
 }
 
 // Hub 返回内部 Hub 引用（供 handlers 使用）。
@@ -293,6 +329,8 @@ func (s *SignalingServer) handleMessage(c *Client, raw []byte) {
 		s.onPing(c, env)
 	case protocol.SigPong:
 		// 由对端发起，此处忽略
+	case protocol.SigDCRelay:
+		s.onDCRelay(c, env)
 	default:
 		s.sendError(c, env.SessionID, protocol.ErrInvalidPayload, "未知消息类型: "+string(env.Type))
 	}
@@ -318,7 +356,18 @@ func (s *SignalingServer) onConnect(c *Client, env *protocol.SignalEnvelope) {
 		return
 	}
 
-	// 控制端发起连接：查找被控端
+	// 控制端发起连接：校验全局安全策略
+	if allowed, reason := s.checkSecurityPolicy(string(p.Mode)); !allowed {
+		ack, _ := protocol.NewSignalEnvelope(protocol.SigConnectAck, protocol.ConnectAckPayload{
+			OK:   false,
+			Code: protocol.ErrPermissionDenied,
+		})
+		_ = c.SendJSON(ack)
+		log.Printf("[signaling] 连接被安全策略拒绝 device=%s mode=%s: %s", p.DeviceID, p.Mode, reason)
+		return
+	}
+
+	// 查找被控端
 	device := s.hub.FindDevice(p.DeviceID)
 	if device == nil {
 		ack, _ := protocol.NewSignalEnvelope(protocol.SigConnectAck, protocol.ConnectAckPayload{
@@ -421,6 +470,35 @@ func (s *SignalingServer) onPing(c *Client, env *protocol.SignalEnvelope) {
 		RTT:      int(rtt),
 	})
 	_ = c.SendJSON(ack)
+}
+
+// onDCRelay 处理 DataChannel 消息中继（P2P 不可达时走信令转发）。
+// 信令信封的 payload 内嵌一个 DataChannel Envelope（含 type/ts/seq/payload）。
+// 文件传输相关消息（file_meta/file_chunk/file_ack/file_complete 等）经此通道中继，
+// 由 FileRelayManager 做分片校验与传输队列统计。
+func (s *SignalingServer) onDCRelay(c *Client, env *protocol.SignalEnvelope) {
+	sess := s.hub.FindSession(env.SessionID)
+	if sess == nil {
+		s.sendError(c, env.SessionID, protocol.ErrSessionNotFound, "会话不存在")
+		return
+	}
+	// 解析内嵌的 DataChannel Envelope
+	var dcEnv protocol.Envelope
+	if err := json.Unmarshal(env.Payload, &dcEnv); err != nil {
+		s.sendError(c, env.SessionID, protocol.ErrInvalidPayload, "dc_relay payload 解析失败")
+		return
+	}
+	// 防重放：校验时间戳（允许 60 秒窗口）
+	if dcEnv.Ts > 0 {
+		diff := time.Now().UnixMilli() - dcEnv.Ts
+		if diff > 60000 || diff < -60000 {
+			s.sendError(c, env.SessionID, protocol.ErrReplayDetected, "消息时间戳超出窗口")
+			return
+		}
+	}
+	// 通过文件中继管理器转发并校验
+	fromController := c.Role == "controller"
+	s.hub.FileRelay().RelayFileMessage(sess, fromController, &dcEnv)
 }
 
 // sendError 向客户端发送错误信令。

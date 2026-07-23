@@ -114,16 +114,18 @@ func (d *Deps) CreateAnnouncement(c *fiber.Ctx) error {
 		req.Platform = "all"
 	}
 	authorID := getUserIDFromContext(c)
+	createdAt := time.Now().Unix()
+	// Ed25519 数字签名：对 title + contentMd + createdAt 签名
+	signature := SignAnnouncement(req.Title, req.ContentMD, createdAt)
 	res, err := d.DB.Exec(
-		`INSERT INTO announcements (title, content_md, pinned, platform, version_filter, author_id, status)
-		 VALUES (?, ?, ?, ?, ?, ?, 'published')`,
-		req.Title, req.ContentMD, boolToInt(req.Pinned), req.Platform, req.VersionFilter, authorID,
+		`INSERT INTO announcements (title, content_md, pinned, platform, version_filter, author_id, status, signature, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, ?, ?, 'published', ?, ?, ?)`,
+		req.Title, req.ContentMD, boolToInt(req.Pinned), req.Platform, req.VersionFilter, authorID, signature, createdAt, createdAt,
 	)
 	if err != nil {
 		return failInternal(c, "创建公告失败")
 	}
 	id, _ := res.LastInsertId()
-	// Phase 5 将在此处添加 Ed25519 数字签名
 	return ok(c, Announcement{
 		ID:        id,
 		Title:     req.Title,
@@ -133,13 +135,15 @@ func (d *Deps) CreateAnnouncement(c *fiber.Ctx) error {
 		VersionFilter: req.VersionFilter,
 		AuthorID:  authorID,
 		Status:    "published",
-		CreatedAt: time.Now().Unix(),
-		UpdatedAt: time.Now().Unix(),
+		Signature: signature,
+		CreatedAt: createdAt,
+		UpdatedAt: createdAt,
 	})
 }
 
 // UpdateAnnouncement 更新公告（管理员）。
 // PUT /api/admin/announcements/:id
+// 更新后重新生成 Ed25519 签名（基于新内容 + 原 createdAt 保持签名稳定）
 func (d *Deps) UpdateAnnouncement(c *fiber.Ctx) error {
 	if !requireAdmin(c) {
 		return failForbidden(c, "需要管理员权限")
@@ -152,15 +156,27 @@ func (d *Deps) UpdateAnnouncement(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return failBadRequest(c, "请求体格式错误")
 	}
+	if req.Platform == "" {
+		req.Platform = "all"
+	}
+	// 读取原 createdAt（签名内容包含 createdAt，更新内容需基于原 createdAt 重新签名）
+	var createdAt int64
+	_ = d.DB.QueryRow(`SELECT created_at FROM announcements WHERE id = ?`, id).Scan(&createdAt)
+	if createdAt == 0 {
+		createdAt = time.Now().Unix()
+	}
+	// Ed25519 重新签名：对 title + contentMd + createdAt 签名
+	signature := SignAnnouncement(req.Title, req.ContentMD, createdAt)
+	updatedAt := time.Now().Unix()
 	if _, err := d.DB.Exec(
 		`UPDATE announcements
-		 SET title = ?, content_md = ?, pinned = ?, platform = ?, version_filter = ?, updated_at = strftime('%s','now')
+		 SET title = ?, content_md = ?, pinned = ?, platform = ?, version_filter = ?, signature = ?, updated_at = ?
 		 WHERE id = ?`,
-		req.Title, req.ContentMD, boolToInt(req.Pinned), req.Platform, req.VersionFilter, id,
+		req.Title, req.ContentMD, boolToInt(req.Pinned), req.Platform, req.VersionFilter, signature, updatedAt, id,
 	); err != nil {
 		return failInternal(c, "更新公告失败")
 	}
-	return ok(c, fiber.Map{"updated": id})
+	return ok(c, fiber.Map{"updated": id, "signature": signature})
 }
 
 // DeleteAnnouncement 删除公告（管理员，软删除：标记 archived）。

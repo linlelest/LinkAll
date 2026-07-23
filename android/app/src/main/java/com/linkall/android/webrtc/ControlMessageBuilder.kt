@@ -2,9 +2,16 @@ package com.linkall.android.webrtc
 
 import com.linkall.android.data.model.Envelope
 import com.linkall.android.data.model.FileAckPayload
+import com.linkall.android.data.model.FileCancelPayload
 import com.linkall.android.data.model.FileChunkPayload
 import com.linkall.android.data.model.FileCompletePayload
+import com.linkall.android.data.model.FileDirRequestPayload
+import com.linkall.android.data.model.FileDirResponsePayload
+import com.linkall.android.data.model.FileListRequestPayload
+import com.linkall.android.data.model.FileListResponsePayload
 import com.linkall.android.data.model.FileMetaPayload
+import com.linkall.android.data.model.FileProgressPayload
+import com.linkall.android.data.model.FileResumePayload
 import com.linkall.android.data.model.HeartbeatPayload
 import com.linkall.android.data.model.KeyboardPayload
 import com.linkall.android.data.model.MessageType
@@ -135,6 +142,65 @@ class ControlMessageBuilder(private val json: Json) {
         ts = now(),
         seq = nextSeq(),
         payload = json.encodeToJsonElement(FileCompletePayload.serializer(), complete)
+    )
+
+    /** 文件断点续传请求 */
+    fun fileResume(resume: FileResumePayload): Envelope = Envelope(
+        type = MessageType.FILE_RESUME,
+        ts = now(),
+        seq = nextSeq(),
+        payload = json.encodeToJsonElement(FileResumePayload.serializer(), resume)
+    )
+
+    /** 文件取消传输 */
+    fun fileCancel(cancel: FileCancelPayload): Envelope = Envelope(
+        type = MessageType.FILE_CANCEL,
+        ts = now(),
+        seq = nextSeq(),
+        payload = json.encodeToJsonElement(FileCancelPayload.serializer(), cancel)
+    )
+
+    /** 文件列表请求（浏览远程目录） */
+    fun fileListRequest(path: String): Envelope = Envelope(
+        type = MessageType.FILE_LIST_REQUEST,
+        ts = now(),
+        seq = nextSeq(),
+        payload = json.encodeToJsonElement(
+            FileListRequestPayload.serializer(),
+            FileListRequestPayload(path)
+        )
+    )
+
+    /** 文件列表响应 */
+    fun fileListResponse(resp: FileListResponsePayload): Envelope = Envelope(
+        type = MessageType.FILE_LIST_RESPONSE,
+        ts = now(),
+        seq = nextSeq(),
+        payload = json.encodeToJsonElement(FileListResponsePayload.serializer(), resp)
+    )
+
+    /** 目录树请求 */
+    fun fileDirRequest(req: FileDirRequestPayload): Envelope = Envelope(
+        type = MessageType.FILE_DIR_REQUEST,
+        ts = now(),
+        seq = nextSeq(),
+        payload = json.encodeToJsonElement(FileDirRequestPayload.serializer(), req)
+    )
+
+    /** 目录树响应 */
+    fun fileDirResponse(resp: FileDirResponsePayload): Envelope = Envelope(
+        type = MessageType.FILE_DIR_RESPONSE,
+        ts = now(),
+        seq = nextSeq(),
+        payload = json.encodeToJsonElement(FileDirResponsePayload.serializer(), resp)
+    )
+
+    /** 文件传输进度上报 */
+    fun fileProgress(progress: FileProgressPayload): Envelope = Envelope(
+        type = MessageType.FILE_PROGRESS,
+        ts = now(),
+        seq = nextSeq(),
+        payload = json.encodeToJsonElement(FileProgressPayload.serializer(), progress)
     )
 
     /** 设置同步 */

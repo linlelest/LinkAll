@@ -58,3 +58,8 @@ export function updateAnnouncement(
 export function deleteAnnouncement(id: number): Promise<{ deleted: number }> {
   return request<{ deleted: number }>(`/api/admin/announcements/${id}`, { method: 'DELETE' });
 }
+
+// 获取公告验签公钥（Ed25519 十六进制）
+export function getAnnouncementPublicKey(): Promise<{ publicKey: string }> {
+  return request<{ publicKey: string }>('/api/announcements/public-key');
+}

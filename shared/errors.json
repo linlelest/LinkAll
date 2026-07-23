@@ -100,6 +100,51 @@
       "i18nKey": "error.file_hash_mismatch",
       "description": "文件哈希校验失败"
     },
+    "ERR_FILE_CHUNK_MISMATCH": {
+      "http": 400,
+      "i18nKey": "error.file_chunk_mismatch",
+      "description": "文件分片 ID 或偏移量错位"
+    },
+    "ERR_FILE_TRANSFER_CANCELLED": {
+      "http": 409,
+      "i18nKey": "error.file_transfer_cancelled",
+      "description": "文件传输已取消"
+    },
+    "ERR_FILE_TRANSFER_NOT_FOUND": {
+      "http": 404,
+      "i18nKey": "error.file_transfer_not_found",
+      "description": "文件传输任务不存在"
+    },
+    "ERR_FILE_TRANSFER_QUOTA_EXCEEDED": {
+      "http": 413,
+      "i18nKey": "error.file_transfer_quota_exceeded",
+      "description": "超出文件传输配额或并发上限"
+    },
+    "ERR_FILE_RESUME_FAILED": {
+      "http": 409,
+      "i18nKey": "error.file_resume_failed",
+      "description": "断点续传恢复失败（记录损坏或偏移越界）"
+    },
+    "ERR_ANNOUNCEMENT_SIGNATURE_INVALID": {
+      "http": 401,
+      "i18nKey": "error.announcement_signature_invalid",
+      "description": "公告 Ed25519 签名校验失败"
+    },
+    "ERR_CRASH_REPORT_INVALID": {
+      "http": 400,
+      "i18nKey": "error.crash_report_invalid",
+      "description": "崩溃上报数据格式无效或字段缺失"
+    },
+    "ERR_DEVICE_PAIRING_REQUIRED": {
+      "http": 403,
+      "i18nKey": "error.device_pairing_required",
+      "description": "同账号设备首次连接需完成配对确认"
+    },
+    "ERR_DEVICE_DISCOVER_FAILED": {
+      "http": 404,
+      "i18nKey": "error.device_discover_failed",
+      "description": "未发现同账号在线设备"
+    },
     "ERR_RATE_LIMITED": {
       "http": 429,
       "i18nKey": "error.rate_limited",

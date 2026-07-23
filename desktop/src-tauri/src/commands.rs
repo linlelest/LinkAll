@@ -188,3 +188,15 @@ pub async fn get_user_info(
                 .transpose()
         })
 }
+
+/// 导出日志（一键打包最近日志内容返回给前端）
+#[tauri::command]
+pub async fn export_logs() -> Result<String, String> {
+    // 日志目录：<data_dir>/LinkALL/logs/linkall.log
+    let log_dir = dirs::data_dir()
+        .ok_or_else(|| "无法确定数据目录".to_string())?
+        .join("LinkALL")
+        .join("logs");
+    let log_file = log_dir.join("linkall.log");
+    std::fs::read_to_string(&log_file).map_err(|e| format!("读取日志失败：{}", e))
+}
