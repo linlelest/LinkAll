@@ -5,6 +5,10 @@
 -dontwarn android.support.**
 -dontwarn javax.annotation.**
 -dontwarn org.jetbrains.annotations.**
+# Google Error Prone 注解（仅编译期静态分析用，Tink/security-crypto 引用但运行时无需）
+-dontwarn com.google.errorprone.annotations.**
+# Google Tink（security-crypto 依赖，引用 errorprone 注解）
+-keep class com.google.crypto.tink.** { *; }
 -keepattributes Signature, *Annotation*, InnerClasses, EnclosingMethod, SourceFile, LineNumberTable, Exceptions, Deprecated, RuntimeVisibleAnnotations, AnnotationDefault
 
 # === Kotlin 元数据 ===
