@@ -50,7 +50,7 @@ func (d *Deps) ReportCrash(c *fiber.Ctx) error {
 	}
 	// 基本校验：crashType 或 stackTrace 至少有一个非空
 	if strings.TrimSpace(req.StackTrace) == "" && strings.TrimSpace(req.CrashType) == "" {
-		return fail(c, fiber.StatusBadRequest, ErrCrashReportInvalid, "崩溃类型与堆栈不能同时为空")
+		return fail(c, fiber.StatusBadRequest, CodeInvalidPayload, "崩溃类型与堆栈不能同时为空")
 	}
 	// 限制单字段最大长度（64KB），防止超大日志撑爆数据库
 	maxFieldLen := 64 * 1024
