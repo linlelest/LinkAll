@@ -28,11 +28,11 @@ jobs:
           npm install
           npm run build
 
-      - name: Copy web/dist into server/web_dist (for go:embed)
+      - name: Copy web/dist into server/internal/static/web_dist (for go:embed)
         run: |
-          rm -rf server/web_dist
-          cp -r web/dist server/web_dist
-          ls -la server/web_dist/
+          rm -rf server/internal/static/web_dist
+          cp -r web/dist server/internal/static/web_dist
+          ls -la server/internal/static/web_dist/
 
       # --- 构建 Go 服务端（前端已嵌入）---
       - name: Setup Go 1.24

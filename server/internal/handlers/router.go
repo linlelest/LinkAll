@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/gofiber/fiber/v2"
 
-	"linkall/server/internal/static"
+	"github.com/linlelest/LinkALL/server/internal/static"
 )
 
 // RegisterRoutes 注册所有 HTTP API 路由。
