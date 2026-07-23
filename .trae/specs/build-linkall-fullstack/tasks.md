@@ -182,7 +182,7 @@
   - [x] SubTask 4.7.2：自启动引导（各厂商 ROM 适配文档）
 
 - [x] **Task 4.8**：GitHub Actions CI 配置（Android 端）
-  - [x] SubTask 4.8.1：编写 `.github/workflows/android.yml`，Gradle 构建 arm64-v8a + armeabi-v7a APK（R8 全开），上传 artifact
+  - [x] SubTask 4.8.1：编写 `.github/workflows/android.yml`，Gradle 构建 arm64-v8a + armeabi-v7a APK（R8 兼容模式：minify+shrink+obfuscate，fullMode=false 规避第三方库缺失类），上传 artifact
   - [x] SubTask 4.8.2：配置触发条件（push 到 main，路径 `android/**`）
 
 - [x] **Task 4.9**：Phase 4 自动 push 触发 CI

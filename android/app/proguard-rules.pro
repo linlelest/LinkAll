@@ -1,7 +1,10 @@
 # LinkALL Android R8 全开规则
 
 # === 通用选项 ===
+# 兜底：忽略所有缺失类警告（第三方库引用运行时类，编译期无法解析）
 -dontwarn android.support.**
+-dontwarn javax.annotation.**
+-dontwarn org.jetbrains.annotations.**
 -keepattributes Signature, *Annotation*, InnerClasses, EnclosingMethod, SourceFile, LineNumberTable, Exceptions, Deprecated, RuntimeVisibleAnnotations, AnnotationDefault
 
 # === Kotlin 元数据 ===

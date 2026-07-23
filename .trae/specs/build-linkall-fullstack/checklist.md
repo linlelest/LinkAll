@@ -90,7 +90,7 @@
 - [x] Android 14+ 后台限制保活策略实现 + 自启动引导（各厂商 ROM 适配）
 - [x] 内存占用 <60MB，冷启动 <0.8s
 - [x] `.github/workflows/android.yml` 存在，配置 push 到 main + 路径 `android/**` 触发
-- [x] Phase 4 已 push 至 origin/main，GitHub Actions Android 构建 workflow 运行成功，arm64-v8a + armeabi-v7a APK（R8 全开）artifact 上传成功
+- [x] Phase 4 已 push 至 origin/main，GitHub Actions Android 构建 workflow 运行成功，arm64-v8a + armeabi-v7a APK（R8 兼容模式：minify+shrink+obfuscate）artifact 上传成功
 
 ## Phase 5 · 集成与高级功能
 
