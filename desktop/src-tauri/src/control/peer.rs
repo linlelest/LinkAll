@@ -90,13 +90,11 @@ impl ControlPeer {
         let pc = Arc::new(api.new_peer_connection(pc_config).await?);
 
         // 3) 视频/音频 recvonly 收发器（控制端只接收）
-        // webrtc 0.12 的 RTCRtpTransceiverInit 未实现 Default，需显式列出全部字段
+        // webrtc 0.12 的 RTCRtpTransceiverInit 仅含 direction 与 send_encodings 两个字段
         fn recvonly_init() -> RTCRtpTransceiverInit {
             RTCRtpTransceiverInit {
                 direction: RTCRtpTransceiverDirection::Recvonly,
                 send_encodings: vec![],
-                send_codecs: vec![],
-                receive_codecs: vec![],
             }
         }
         pc.add_transceiver_from_kind(
