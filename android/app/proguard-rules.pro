@@ -28,7 +28,7 @@
 -keep @kotlinx.serialization.Serializable class * { *; }
 -keepclassmembers @kotlinx.serialization.Serializable class * {
     *** Companion;
-    <static>;
+    static <methods>;
 }
 -keepclasseswithmembers class * {
     kotlinx.serialization.KSerializer serializer(...);
