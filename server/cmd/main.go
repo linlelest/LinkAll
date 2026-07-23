@@ -29,6 +29,7 @@ import (
 	"github.com/linlelest/LinkALL/server/internal/handlers"
 	applogger "github.com/linlelest/LinkALL/server/internal/logger"
 	"github.com/linlelest/LinkALL/server/internal/i18n"
+	"github.com/linlelest/LinkALL/server/internal/static"
 	"github.com/linlelest/LinkALL/server/internal/webrtc"
 )
 
@@ -428,6 +429,12 @@ func runServer(flags []string) {
 	// 注册路由
 	handlers.RegisterRoutes(app, deps)
 
+	// 检查网页端是否已嵌入
+	frontendStatus := "未嵌入"
+	if static.HasFrontend() {
+		frontendStatus = "已嵌入"
+	}
+
 	// 输出启动信息
 	fmt.Println()
 	fmt.Println("╔══════════════════════════════════════════════════╗")
@@ -438,12 +445,16 @@ func runServer(flags []string) {
 	fmt.Printf("║  ICE 配置: %-38s║\n", truncate(iceConfig.Describe(), 38))
 	fmt.Printf("║  会话超时: %-38s║\n", "30min")
 	fmt.Printf("║  心跳间隔: %-38s║\n", "15s")
+	fmt.Printf("║  网页前端: %-38s║\n", frontendStatus)
 	fmt.Println("║                                                  ║")
 	fmt.Println("║  API 文档:                                        ║")
 	fmt.Println("║    GET  /api/health                               ║")
 	fmt.Println("║    POST /api/auth/login                           ║")
 	fmt.Println("║    POST /api/auth/register                        ║")
 	fmt.Println("║    GET  /ws/signaling (WebSocket)                ║")
+	if frontendStatus == "已嵌入" {
+		fmt.Println("║  网页前端: http://<服务器地址>:" + cfg.ServerPort + "/            ║")
+	}
 	fmt.Println("╚══════════════════════════════════════════════════╝")
 	fmt.Println()
 

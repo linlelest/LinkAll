@@ -8,17 +8,33 @@ on:
     branches: [main]
 
 jobs:
-  # ==================== 服务端（Go）====================
+  # ==================== 服务端（Go）+ 网页端（嵌入二进制）====================
   server:
-    name: Server (Go)
+    name: Server (Go + embedded Web)
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'pull_request' ||
-      !endsWith(github.event.head_commit.message, '[skip ci]')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # --- 先构建网页端，将 dist 嵌入服务端二进制 ---
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Build web frontend (Vite)
+        working-directory: web
+        run: |
+          npm install
+          npm run build
+
+      - name: Copy web/dist into server/web_dist (for go:embed)
+        run: |
+          rm -rf server/web_dist
+          cp -r web/dist server/web_dist
+          ls -la server/web_dist/
+
+      # --- 构建 Go 服务端（前端已嵌入）---
       - name: Setup Go 1.24
         uses: actions/setup-go@v5
         with:
@@ -36,7 +52,7 @@ jobs:
         working-directory: server
         run: gofmt -w .
 
-      - name: Build binary (Linux + Windows)
+      - name: Build binary (Linux + Windows, web embedded)
         working-directory: server
         run: |
           GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.appVersion=0.1.0" -o remote-server-linux-amd64 ./cmd
@@ -55,35 +71,6 @@ jobs:
         with:
           name: linkall-server-windows-amd64
           path: server/remote-server-windows-amd64.exe
-          retention-days: 30
-          if-no-files-found: error
-
-  # ==================== 网页端（Svelte 5）====================
-  web:
-    name: Web (Svelte 5)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install dependencies
-        working-directory: web
-        run: npm install
-
-      - name: Build production bundle (Vite)
-        working-directory: web
-        run: npm run build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: linkall-web-dist
-          path: web/dist
           retention-days: 30
           if-no-files-found: error
 

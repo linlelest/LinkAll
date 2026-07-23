@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	fiberstatic "github.com/gofiber/fiber/v2/middleware/static"
+
+	"linkall/server/internal/static"
 )
 
 // RegisterRoutes 注册所有 HTTP API 路由。
@@ -94,4 +97,20 @@ func RegisterRoutes(app *fiber.App, d *Deps) {
 	// --- WebSocket 信令通道 ---
 	// /ws/signaling?token=<JWT>&deviceId=<可选>
 	app.Get("/ws/signaling", d.Signaling.HandleFiber())
+
+	// --- 网页端静态文件服务（嵌入在二进制中）---
+	// 启动后端即自动提供网页前端，无需额外部署静态文件服务器。
+	app.Use("/", fiberstatic.New("", fiberstatic.Config{
+		FS:     static.FS(),
+		Index:  "index.html",
+		Browse: false,
+		Next: func(c *fiber.Ctx) bool {
+			// /api/* 和 /ws/* 路由不被静态文件中间件拦截
+			path := c.Path()
+			if len(path) >= 4 && path[:4] == "/api" || len(path) >= 3 && path[:3] == "/ws" {
+				return true // 跳过静态文件处理，交给后续路由
+			}
+			return false
+		},
+	}))
 }
