@@ -3,6 +3,7 @@
 import { authStore } from './auth';
 
 export type RouteName =
+  | 'setup'
   | 'login'
   | 'dashboard'
   | 'devices'
@@ -24,6 +25,7 @@ class RouterStore {
   private syncFromHash() {
     const h = (typeof window !== 'undefined' ? window.location.hash : '').replace(/^#\/?/, '');
     const valid: RouteName[] = [
+      'setup',
       'login',
       'dashboard',
       'devices',

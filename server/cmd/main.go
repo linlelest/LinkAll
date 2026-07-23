@@ -346,11 +346,11 @@ func runServer(flags []string) {
 	}
 	log.Println("[server] 数据库迁移完成")
 
-	// 检查是否有超级管理员，若无则提示运行 init
+	// 检查是否有超级管理员，若无则提示访问网页端完成首次初始化
 	var adminCount int
 	_ = database.QueryRow(`SELECT COUNT(*) FROM users WHERE role = 'superadmin'`).Scan(&adminCount)
 	if adminCount == 0 {
-		log.Println("[server] 警告: 尚未创建超级管理员，请先运行 './remote-server init'")
+		log.Println("[server] 提示: 尚未创建超级管理员，请访问网页端完成首次初始化（/setup）")
 	}
 
 	// 初始化 i18n
@@ -434,11 +434,16 @@ func runServer(flags []string) {
 	if static.HasFrontend() {
 		frontendStatus = "已嵌入"
 	}
+	// 检查是否需要首次初始化（无 superadmin）
+	setupStatus := "已完成"
+	if deps.NeedsSetup() {
+		setupStatus = "待初始化"
+	}
 
 	// 输出启动信息
 	fmt.Println()
 	fmt.Println("╔══════════════════════════════════════════════════╗")
-	fmt.Println("║         LinkALL 服务端 v" + appVersion + " (Phase 1)          ║")
+	fmt.Println("║         LinkALL 服务端 v" + appVersion + " (Phase 6)          ║")
 	fmt.Println("╠══════════════════════════════════════════════════╣")
 	fmt.Printf("║  监听端口: %-37s║\n", ":"+cfg.ServerPort)
 	fmt.Printf("║  数据库: %-39s║\n", truncate(cfg.DBPath, 39))
@@ -446,6 +451,7 @@ func runServer(flags []string) {
 	fmt.Printf("║  会话超时: %-38s║\n", "30min")
 	fmt.Printf("║  心跳间隔: %-38s║\n", "15s")
 	fmt.Printf("║  网页前端: %-38s║\n", frontendStatus)
+	fmt.Printf("║  初始化: %-40s║\n", setupStatus)
 	fmt.Println("║                                                  ║")
 	fmt.Println("║  API 文档:                                        ║")
 	fmt.Println("║    GET  /api/health                               ║")
@@ -456,6 +462,9 @@ func runServer(flags []string) {
 		fmt.Println("║  网页前端: http://<服务器地址>:" + cfg.ServerPort + "/            ║")
 	}
 	fmt.Println("╚══════════════════════════════════════════════════╝")
+	if setupStatus == "待初始化" {
+		fmt.Println("[server] 请访问网页端 http://<服务器地址>:" + cfg.ServerPort + "/#/setup 创建管理员账户")
+	}
 	fmt.Println()
 
 	// 优雅关闭

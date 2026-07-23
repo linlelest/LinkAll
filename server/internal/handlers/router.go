@@ -19,6 +19,10 @@ func RegisterRoutes(app *fiber.App, d *Deps) {
 	api.Get("/health", d.HealthCheck)
 	api.Get("/security/public-key", d.GetRSAPublicKey) // RSA 公钥（供客户端加密设备码）
 
+	// --- 首次启动初始化路由（公开：仅在无 superadmin 时可用）---
+	api.Get("/setup/status", d.GetSetupStatus)
+	api.Post("/setup/init", d.InitSetup)
+
 	// --- 认证路由 ---
 	authGroup := api.Group("/auth")
 	authGroup.Post("/login", d.Login)

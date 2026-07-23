@@ -82,6 +82,7 @@ const (
 	CodeRateLimited      ErrorCode = "ERR_RATE_LIMITED"
 	CodeInvalidPayload   ErrorCode = "ERR_INVALID_PAYLOAD"
 	CodeInternalError    ErrorCode = "ERR_INTERNAL_ERROR"
+	CodeSetupAlreadyDone ErrorCode = "ERR_SETUP_ALREADY_DONE"
 )
 
 // ok 成功响应。
