@@ -26,9 +26,8 @@ use webrtc::peer_connection::peer_connection_state::RTCPeerConnectionState;
 use webrtc::peer_connection::sdp::session_description::RTCSessionDescription;
 use webrtc::peer_connection::RTCPeerConnection;
 use webrtc::rtp_transceiver::rtp_receiver::RTCRtpReceiver;
-use webrtc::rtp_transceiver::rtp_sender::RTCRtpSender;
 use webrtc::rtp_transceiver::rtp_transceiver_direction::RTCRtpTransceiverDirection;
-use webrtc::rtp_transceiver::rtp_transceiver_init::RTCRtpTransceiverInit;
+use webrtc::rtp_transceiver::{RTCRtpTransceiver, RTCRtpTransceiverInit};
 use webrtc::track::track_remote::TrackRemote;
 
 use super::datachannel::ControlSender;
@@ -141,7 +140,7 @@ impl ControlPeer {
         // 处理远端轨道到达（仅日志，实际渲染在前端 <video> 元素由 stream 完成）
         pc.on_track(Box::new({
             let tx = event_tx.clone();
-            move |track: Arc<TrackRemote>, _receiver: Arc<RTCRtpReceiver>, _sender: Arc<RTCRtpSender>| {
+            move |track: Arc<TrackRemote>, _receiver: Arc<RTCRtpReceiver>, _transceiver: Arc<RTCRtpTransceiver>| {
                 log::info!("控制端收到远端轨道：kind={}", track.kind());
                 let _ = tx;
                 Box::pin(async move {
