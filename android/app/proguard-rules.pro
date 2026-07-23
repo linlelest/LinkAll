@@ -7,6 +7,10 @@
 -dontwarn org.jetbrains.annotations.**
 # Google Error Prone 注解（仅编译期静态分析用，Tink/security-crypto 引用但运行时无需）
 -dontwarn com.google.errorprone.annotations.**
+# Google Tink KeysDownloader 引用的可选依赖（远程密钥获取功能，本地 EncryptedSharedPreferences 不使用）
+-dontwarn com.google.api.client.http.**
+-dontwarn com.google.api.client.http.javanet.**
+-dontwarn org.joda.time.**
 # Google Tink（security-crypto 依赖，引用 errorprone 注解）
 -keep class com.google.crypto.tink.** { *; }
 -keepattributes Signature, *Annotation*, InnerClasses, EnclosingMethod, SourceFile, LineNumberTable, Exceptions, Deprecated, RuntimeVisibleAnnotations, AnnotationDefault
