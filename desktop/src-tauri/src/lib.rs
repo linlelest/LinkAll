@@ -1,10 +1,12 @@
 // LinkALL 桌面被控端 - Tauri 2 应用库
 // 声明所有模块并提供 run() 入口函数。
+// 同时承载被控端（DaemonState）与控制端（ControlState）能力。
 mod auth;
 mod autostart;
 mod capture;
 mod commands;
 mod config;
+mod control;
 mod daemon;
 mod device;
 mod encoder;
@@ -16,6 +18,7 @@ mod webrtc;
 use tauri::{Emitter, Manager};
 use tokio::sync::mpsc;
 
+use control::state::{ControlEvent, ControlState};
 use daemon::{DaemonEvent, DaemonState};
 
 /// 应用入口：初始化日志、数据库、守护进程、托盘，启动 Tauri 事件循环。
@@ -31,6 +34,8 @@ pub fn run() {
 
     // 创建守护进程事件通道
     let (event_tx, mut event_rx) = mpsc::unbounded_channel::<DaemonEvent>();
+    // 创建控制端事件通道
+    let (control_tx, mut control_rx) = mpsc::unbounded_channel::<ControlEvent>();
 
     // 创建 Tauri 应用
     tauri::Builder::default()
@@ -45,6 +50,11 @@ pub fn run() {
 
             // 注册 Tauri 托管状态（Tauri 内部会用 RwLock 包裹）
             app.manage(daemon_state);
+
+            // 初始化控制端状态（与 DaemonState 平级但独立）
+            // 同一进程可同时作为被控端与控制端
+            let control_state = ControlState::new(control_tx);
+            app.manage(control_state);
 
             // 初始化系统托盘
             if let Err(e) = tray::init_tray(app.handle()) {
@@ -71,6 +81,35 @@ pub fn run() {
                 }
             });
 
+            // 启动控制端事件转发任务（→ Tauri 前端事件）
+            // 将 ControlEvent 转为前端可订阅的事件名与 payload
+            let control_app_handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                while let Some(evt) = control_rx.recv().await {
+                    let (name, payload) = match evt {
+                        ControlEvent::Connected => {
+                            ("control-connected", serde_json::Value::Null)
+                        }
+                        ControlEvent::Disconnected => {
+                            ("control-disconnected", serde_json::Value::Null)
+                        }
+                        ControlEvent::Failed(msg) => {
+                            ("control-error", serde_json::json!({ "message": msg }))
+                        }
+                        ControlEvent::Stats(stats) => {
+                            ("peer-stats", serde_json::to_value(&stats).unwrap_or(serde_json::Value::Null))
+                        }
+                        ControlEvent::ConnectionRequest(req) => {
+                            ("connection-request", serde_json::to_value(&req).unwrap_or(serde_json::Value::Null))
+                        }
+                        ControlEvent::SignalingOpen => {
+                            ("signaling-open", serde_json::Value::Null)
+                        }
+                    };
+                    let _ = control_app_handle.emit(name, payload);
+                }
+            });
+
             log::info!("LinkALL 桌面被控端已就绪");
             Ok(())
         })
@@ -92,6 +131,14 @@ pub fn run() {
             commands::get_auth_status,
             commands::get_user_info,
             commands::export_logs,
+            // 控制端命令
+            commands::connect_to_device,
+            commands::send_control_event,
+            commands::get_peer_stats,
+            commands::disconnect_peer,
+            commands::discover_devices,
+            commands::get_connection_requests,
+            commands::respond_connection_request,
         ])
         .run(tauri::generate_context!())
         .expect("运行 Tauri 应用时出错");

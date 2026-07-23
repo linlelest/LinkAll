@@ -226,43 +226,43 @@
 
 ---
 
-## Phase 6 · OTA、优化与交付
+## Phase 6 · 桌面端重构 + 服务端首次启动初始化
 
-- [ ] **Task 6.1**：服务端 OTA 路由
-  - [ ] SubTask 6.1.1：实现 /ota 路由（文件上传至 /ota 目录、元数据入库、自动生成哈希、版本管理）
-  - [ ] SubTask 6.1.2：实现强制标志下发、CRUD、批量下架、下载量统计
-  - [ ] SubTask 6.1.3：OTA 更新包 Ed25519 签名校验
+> 详细方案见 `phase6-plan.md`。原 OTA/优化/交付任务延后至 Phase 7。
 
-- [ ] **Task 6.2**：客户端 OTA 检查逻辑
-  - [ ] SubTask 6.2.1：启动 + 每小时轮询 /api/ota/check，版本对比
-  - [ ] SubTask 6.2.2：强制更新锁定界面仅显示进度条、拦截返回键
-  - [ ] SubTask 6.2.3：签名校验防篡改，失败自动回滚
+- [ ] **Task 6.A**：服务端首次启动初始化 API
+  - [ ] SubTask 6.A.1：新增 `server/internal/handlers/setup.go`：`GET /api/setup/status` + `POST /api/setup/init`，atomic 标志防二次创建
+  - [ ] SubTask 6.A.2：修改 `router.go`：注册 setup 路由（公开，但 init 仅在 needsSetup=true 时可用）
+  - [ ] SubTask 6.A.3：修改 `cmd/main.go`：启动时查询 superadmin 数量，banner 显示初始化状态
+  - [ ] SubTask 6.A.4：修改 `shared/errors.json`：新增 setup 相关错误码
 
-- [ ] **Task 6.3**：性能优化
-  - [ ] SubTask 6.3.1：WebRTC 码率自适应算法优化（GCC + 滑块阈值联动）
-  - [ ] SubTask 6.3.2：内存泄漏排查（WebRTC 轨道销毁、Compose 状态回收、Tauri GC 调优）
-  - [ ] SubTask 6.3.3：二进制体积优化（Go ldflags="-s -w"、Tauri 剔除无用依赖、Android ProGuard/R8 全开）
-  - [ ] SubTask 6.3.4：网络弱网测试（3G/高丢包/高延迟模拟，验证重连/降码率/断线保活）
-  - [ ] SubTask 6.3.5：全链路压力测试（100+ 并发信令、多设备同时控制、大文件并发传输）
+- [ ] **Task 6.B**：网页端 Setup 页面与路由守卫
+  - [ ] SubTask 6.B.1：新增 `web/src/routes/Setup.svelte`：用户名 + 密码 + 二次确认 + 提交，完成后自动登录
+  - [ ] SubTask 6.B.2：修改 `web/src/App.svelte`：路由守卫在 login 前检查 `/api/setup/status`，needsSetup=true 时强制渲染 Setup
+  - [ ] SubTask 6.B.3：修改 `web/src/lib/api/client.ts` + i18n 字符串
 
-- [ ] **Task 6.4**：多语言收尾
-  - [ ] SubTask 6.4.1：zh-CN / en-US 全量字符串校对，确保无遗漏、语境准确
-  - [ ] SubTask 6.4.2：日期/数字格式化跟随 Locale，RTL 预留
+- [ ] **Task 6.C**：桌面端 UI 重构（被控 + 控制双模式）
+  - [ ] SubTask 6.C.1：重构 `desktop/frontend/index.html` + `styles.css`：顶部 TabBar（被控/控制/设置）三视图切换框架
+  - [ ] SubTask 6.C.2：拆分 `app.js` 为 ES Modules：`views/` + `control/` + `lib/`，新增 i18n 双语
+  - [ ] SubTask 6.C.3：新增 Rust 控制端模块 `desktop/src-tauri/src/control/`：客户端 WebRTC PeerSession + 信令 + DataChannel 控制指令
+  - [ ] SubTask 6.C.4：新增 Tauri 命令：`connect_to_device` / `send_control_event` / `get_peer_stats` / `disconnect_peer`
+  - [ ] SubTask 6.C.5：实现控制页：连接表单 → 全屏控制画布（虚拟鼠标/键盘/滚轮/左右键 + 缩放/码率/帧率抽屉 + 防窥屏 + 文件传输入口）
+  - [ ] SubTask 6.C.6：实现被控页：服务状态/设备身份/连接请求确认弹窗/防窥屏开关
 
-- [ ] **Task 6.5**：文档
-  - [ ] SubTask 6.5.1：部署文档（Linux Systemd / Win NSSM / Docker 可选、.env 配置说明）
-  - [ ] SubTask 6.5.2：用户手册（管理员后台、网页控制、桌面被控、安卓 App 全功能图文指南）
-  - [ ] SubTask 6.5.3：自动化打包流水线（GitHub Actions 编译 Win/Linux/Android/Static Web 全产物）
+- [ ] **Task 6.D**：CI 验证
+  - [ ] SubTask 6.D.1：commit + push，等待 server/desktop CI 通过
 
-- [ ] **Task 6.6**：安全审计
-  - [ ] SubTask 6.6.1：渗透测试（信令劫持、XSS、越权、文件路径遍历、OTA 签名绕过）
+---
 
-- [ ] **Task 6.7**：正式发布
-  - [ ] SubTask 6.7.1：发布 v1.0.0，归档代码，建立 Bug 追踪与反馈通道
+## Phase 7 · OTA、优化与交付（延后）
 
-- [ ] **Task 6.8**：Phase 6 自动 push 触发 CI
-  - [ ] SubTask 6.8.1：commit Phase 6 全部代码
-  - [ ] SubTask 6.8.2：push 至 origin/main，确认 CI workflow 触发并构建成功，归档 v1.0.0 release
+- [ ] **Task 7.1**：服务端 OTA 路由（文件上传/元数据/版本管理/Ed25519 签名）
+- [ ] **Task 7.2**：客户端 OTA 检查逻辑（静默轮询/版本对比/强制拦截/签名校验/失败回滚）
+- [ ] **Task 7.3**：性能优化（码率自适应 GCC/内存泄漏排查/二进制体积/弱网测试/压力测试）
+- [ ] **Task 7.4**：多语言收尾（zh-CN/en-US 全量校对/日期数字格式化/RTL 预留）
+- [ ] **Task 7.5**：文档（部署文档/用户手册/自动化打包流水线）
+- [ ] **Task 7.6**：安全审计（渗透测试）
+- [ ] **Task 7.7**：正式发布 v1.0.0
 
 ---
 

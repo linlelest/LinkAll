@@ -3,124 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkALL 设置</title>
+    <title>LinkALL</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="app">
-        <!-- 头部 -->
-        <header class="header">
-            <div class="logo">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300d4aa'%3E%3Cpath d='M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z'/%3E%3C/svg%3E" alt="logo" width="32" height="32">
-                <h1>LinkALL</h1>
+        <!-- 顶部 TabBar -->
+        <header class="tabbar">
+            <div class="tabbar-logo">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300d4aa'%3E%3Cpath d='M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z'/%3E%3C/svg%3E" alt="logo" width="20" height="20">
+                <span class="tabbar-title">LinkALL</span>
             </div>
-            <span class="version">v0.1.0</span>
+            <nav class="tabbar-nav">
+                <button class="tab active" data-tab="controlled" data-i18n="tabs.controlled">被控</button>
+                <button class="tab" data-tab="control" data-i18n="tabs.control">控制</button>
+                <button class="tab" data-tab="settings" data-i18n="tabs.settings">设置</button>
+            </nav>
+            <span class="tabbar-version" id="app-version">v0.1.0</span>
         </header>
 
-        <!-- 账户区域 -->
-        <section class="section" id="account-section">
-            <h2 class="section-title">账户</h2>
-            <div id="account-login" class="login-form">
-                <input type="text" id="username" placeholder="用户名" class="input">
-                <input type="password" id="password" placeholder="密码" class="input">
-                <button id="btn-login" class="btn btn-primary">登录</button>
-            </div>
-            <div id="account-info" class="account-info hidden">
-                <div class="info-row">
-                    <span class="label">用户名</span>
-                    <span id="display-username" class="value">--</span>
+        <!-- 主内容区：三个页面通过 hidden 切换 -->
+        <main class="main">
+
+            <!-- ============ 被控页 ============ -->
+            <section class="page page-controlled" id="page-controlled">
+                <!-- 服务状态卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="controlled.serviceStatus">服务状态</span>
+                        <div class="status-row">
+                            <span class="status-dot" id="status-dot"></span>
+                            <span id="status-text" data-i18n="controlled.stopped">未运行</span>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button id="btn-start" class="btn btn-primary" data-i18n="controlled.start">启动</button>
+                        <button id="btn-pause" class="btn btn-secondary" disabled data-i18n="controlled.pause">暂停</button>
+                        <button id="btn-stop" class="btn btn-danger" disabled data-i18n="controlled.stop">停止</button>
+                    </div>
                 </div>
-                <div class="info-row">
-                    <span class="label">角色</span>
-                    <span id="display-role" class="value">--</span>
+
+                <!-- 设备身份卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="controlled.deviceIdentity">设备身份</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label" data-i18n="controlled.deviceId">设备编号</span>
+                        <span id="device-id" class="value mono">--</span>
+                        <button class="btn-icon" id="btn-reset-device-id" title="重置" data-i18n-title="controlled.reset">↻</button>
+                    </div>
+                    <div class="info-row">
+                        <span class="label" data-i18n="controlled.deviceCode">设备码</span>
+                        <span id="device-code" class="value mono">--</span>
+                        <button class="btn-icon" id="btn-reset-device-code" title="重置" data-i18n-title="controlled.reset">↻</button>
+                    </div>
                 </div>
-                <button id="btn-logout" class="btn btn-secondary">登出</button>
-            </div>
-        </section>
 
-        <!-- 设备信息 -->
-        <section class="section">
-            <h2 class="section-title">设备信息</h2>
-            <div class="info-row">
-                <span class="label">设备编号</span>
-                <span id="device-id" class="value mono">--</span>
-                <button class="btn-icon" id="btn-reset-device-id" title="重置设备编号">↻</button>
-            </div>
-            <div class="info-row">
-                <span class="label">设备码</span>
-                <span id="device-code" class="value mono">--</span>
-                <button class="btn-icon" id="btn-reset-device-code" title="重置设备码">↻</button>
-            </div>
-        </section>
+                <!-- 防窥屏开关 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="controlled.privacyScreen">防窥屏</span>
+                        <label class="switch">
+                            <input type="checkbox" id="privacy-toggle">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="card-hint" data-i18n="controlled.privacyScreenHint">开启后远端画面将被遮挡</div>
+                </div>
 
-        <!-- 服务器设置 -->
-        <section class="section">
-            <h2 class="section-title">服务器</h2>
-            <div class="form-row">
-                <input type="text" id="server-url" placeholder="http://localhost:8080" class="input">
-                <button id="btn-save-server" class="btn btn-small">保存</button>
-            </div>
-        </section>
+                <!-- 连接请求列表 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="controlled.connectionRequest">连接请求</span>
+                    </div>
+                    <div id="connection-requests" class="request-list">
+                        <div class="empty-hint" data-i18n="controlled.noRequests">暂无连接请求</div>
+                    </div>
+                </div>
+            </section>
 
-        <!-- 服务控制 -->
-        <section class="section">
-            <h2 class="section-title">服务控制</h2>
-            <div class="status-row">
-                <span class="status-dot" id="status-dot"></span>
-                <span id="status-text">未运行</span>
-            </div>
-            <div class="button-group">
-                <button id="btn-start" class="btn btn-primary">启动</button>
-                <button id="btn-pause" class="btn btn-secondary" disabled>暂停</button>
-                <button id="btn-stop" class="btn btn-danger" disabled>停止</button>
-            </div>
-        </section>
+            <!-- ============ 控制页 ============ -->
+            <section class="page page-control hidden" id="page-control">
+                <!-- 连接表单（默认显示，连接后隐藏） -->
+                <div class="card connect-form-card" id="connect-form-card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="control.connectForm">连接表单</span>
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="control.targetDeviceId">设备编号</label>
+                        <input type="text" id="target-device-id" class="input mono" placeholder="XXXXXXXXXXXX" maxlength="12">
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="control.targetDeviceCode">设备码</label>
+                        <input type="text" id="target-device-code" class="input mono" placeholder="------">
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="control.connectionMode">连接模式</label>
+                        <select id="connect-mode" class="input">
+                            <option value="anonymous" data-i18n="control.modeAnonymous">匿名</option>
+                            <option value="same_account" data-i18n="control.modeSameAccount">同账号</option>
+                            <option value="device_code" data-i18n="control.modeDeviceCode">设备码</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button id="btn-connect" class="btn btn-primary" data-i18n="control.connect">连接</button>
+                        <button id="btn-discover" class="btn btn-secondary" data-i18n="control.discoverDevices">发现设备</button>
+                    </div>
+                    <div class="empty-hint hidden" id="discover-hint" data-i18n="control.noDevices">未发现同账号在线设备</div>
+                </div>
 
-        <!-- 视频设置 -->
-        <section class="section">
-            <h2 class="section-title">视频设置</h2>
-            <div class="form-row">
-                <label class="label">编码器</label>
-                <select id="codec-video" class="input">
-                    <option value="H264">H.264</option>
-                    <option value="VP8">VP8</option>
-                    <option value="VP9">VP9</option>
-                    <option value="AV1">AV1</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <label class="label">帧率</label>
-                <input type="number" id="target-fps" min="1" max="60" value="30" class="input">
-            </div>
-            <div class="form-row">
-                <label class="label">码率 (Mbps)</label>
-                <input type="number" id="max-bitrate" min="1" max="50" value="8" class="input">
-            </div>
-            <div class="form-row">
-                <label class="label">缩放</label>
-                <input type="range" id="scale" min="0.5" max="1.5" step="0.1" value="1.0" class="slider">
-                <span id="scale-value" class="value">1.0x</span>
-            </div>
-            <button id="btn-save-video" class="btn btn-small">保存视频设置</button>
-        </section>
+                <!-- 控制画布（连接后显示，全屏沉浸式） -->
+                <div class="control-canvas hidden" id="control-canvas">
+                    <!-- 远端视频 -->
+                    <video id="remote-video" class="remote-video" autoplay playsinline muted></video>
 
-        <!-- 系统设置 -->
-        <section class="section">
-            <h2 class="section-title">系统</h2>
-            <div class="form-row">
-                <label class="label">开机自启</label>
-                <label class="switch">
-                    <input type="checkbox" id="autostart-toggle">
-                    <span class="slider-toggle"></span>
-                </label>
-            </div>
-        </section>
+                    <!-- 顶部状态栏 -->
+                    <div class="canvas-statusbar">
+                        <span class="stat-item"><span data-i18n="control.stats.rtt">RTT</span>: <span id="stat-rtt">--</span>ms</span>
+                        <span class="stat-item"><span data-i18n="control.stats.packetLoss">丢包</span>: <span id="stat-loss">--</span>%</span>
+                        <span class="stat-item"><span data-i18n="control.stats.fps">帧率</span>: <span id="stat-fps">--</span></span>
+                        <span class="stat-item"><span data-i18n="control.stats.duration">时长</span>: <span id="stat-duration">00:00</span></span>
+                        <button id="btn-disconnect" class="btn btn-danger btn-small" data-i18n="control.disconnect">断开</button>
+                    </div>
+
+                    <!-- 虚拟鼠标触控层（透明） -->
+                    <div class="virtual-mouse-layer" id="virtual-mouse-layer"></div>
+
+                    <!-- 悬浮工具条 -->
+                    <div class="canvas-tools">
+                        <button class="tool-btn" id="tool-left" data-i18n="control.tools.leftButton">左键</button>
+                        <button class="tool-btn" id="tool-right" data-i18n="control.tools.rightButton">右键</button>
+                        <button class="tool-btn" id="tool-wheel" data-i18n="control.tools.wheel">滚轮</button>
+                        <button class="tool-btn" id="tool-keyboard" data-i18n="control.tools.keyboard">键盘</button>
+                        <button class="tool-btn" id="tool-settings" data-i18n="control.tools.settings">设置</button>
+                        <button class="tool-btn" id="tool-files" data-i18n="control.tools.files">文件</button>
+                    </div>
+
+                    <!-- 滚轮侧边条 -->
+                    <div class="wheel-slider hidden" id="wheel-slider">
+                        <div class="wheel-track">
+                            <button class="wheel-btn" data-delta="-1">▲</button>
+                            <div class="wheel-thumb" id="wheel-thumb"></div>
+                            <button class="wheel-btn" data-delta="1">▼</button>
+                        </div>
+                    </div>
+
+                    <!-- 虚拟键盘 -->
+                    <div class="virtual-keyboard hidden" id="virtual-keyboard">
+                        <div class="kb-row">
+                            <button class="kb-key" data-key="Escape">Esc</button>
+                            <button class="kb-key" data-key="Digit1">1</button>
+                            <button class="kb-key" data-key="Digit2">2</button>
+                            <button class="kb-key" data-key="Digit3">3</button>
+                            <button class="kb-key" data-key="Digit4">4</button>
+                            <button class="kb-key" data-key="Digit5">5</button>
+                            <button class="kb-key" data-key="Digit6">6</button>
+                            <button class="kb-key" data-key="Digit7">7</button>
+                            <button class="kb-key" data-key="Digit8">8</button>
+                            <button class="kb-key" data-key="Digit9">9</button>
+                            <button class="kb-key" data-key="Digit0">0</button>
+                            <button class="kb-key" data-key="Backspace">⌫</button>
+                        </div>
+                        <div class="kb-row">
+                            <button class="kb-key kb-wide" data-key="Tab">Tab</button>
+                            <button class="kb-key" data-key="KeyQ">Q</button>
+                            <button class="kb-key" data-key="KeyW">W</button>
+                            <button class="kb-key" data-key="KeyE">E</button>
+                            <button class="kb-key" data-key="KeyR">R</button>
+                            <button class="kb-key" data-key="KeyT">T</button>
+                            <button class="kb-key" data-key="KeyY">Y</button>
+                            <button class="kb-key" data-key="KeyU">U</button>
+                            <button class="kb-key" data-key="KeyI">I</button>
+                            <button class="kb-key" data-key="KeyO">O</button>
+                            <button class="kb-key" data-key="KeyP">P</button>
+                        </div>
+                        <div class="kb-row">
+                            <button class="kb-key kb-wide" data-key="CapsLock">Caps</button>
+                            <button class="kb-key" data-key="KeyA">A</button>
+                            <button class="kb-key" data-key="KeyS">S</button>
+                            <button class="kb-key" data-key="KeyD">D</button>
+                            <button class="kb-key" data-key="KeyF">F</button>
+                            <button class="kb-key" data-key="KeyG">G</button>
+                            <button class="kb-key" data-key="KeyH">H</button>
+                            <button class="kb-key" data-key="KeyJ">J</button>
+                            <button class="kb-key" data-key="KeyK">K</button>
+                            <button class="kb-key" data-key="KeyL">L</button>
+                            <button class="kb-key" data-key="Enter">↵</button>
+                        </div>
+                        <div class="kb-row">
+                            <button class="kb-key kb-wide" data-key="ShiftLeft">⇧</button>
+                            <button class="kb-key" data-key="KeyZ">Z</button>
+                            <button class="kb-key" data-key="KeyX">X</button>
+                            <button class="kb-key" data-key="KeyC">C</button>
+                            <button class="kb-key" data-key="KeyV">V</button>
+                            <button class="kb-key" data-key="KeyB">B</button>
+                            <button class="kb-key" data-key="KeyN">N</button>
+                            <button class="kb-key" data-key="KeyM">M</button>
+                            <button class="kb-key kb-wide" data-key="ShiftRight">⇧</button>
+                        </div>
+                        <div class="kb-row">
+                            <button class="kb-key" data-key="ControlLeft">Ctrl</button>
+                            <button class="kb-key" data-key="AltLeft">Alt</button>
+                            <button class="kb-key" data-key="MetaLeft">Win</button>
+                            <button class="kb-key kb-space" data-key="Space">Space</button>
+                            <button class="kb-key" data-key="ArrowLeft">←</button>
+                            <button class="kb-key" data-key="ArrowUp">↑</button>
+                            <button class="kb-key" data-key="ArrowDown">↓</button>
+                            <button class="kb-key" data-key="ArrowRight">→</button>
+                        </div>
+                        <div class="kb-row">
+                            <button class="kb-key kb-close" id="kb-close" data-i18n="common.close">关闭</button>
+                        </div>
+                    </div>
+
+                    <!-- 文件传输面板 -->
+                    <div class="file-panel hidden" id="file-panel">
+                        <div class="file-panel-header">
+                            <span data-i18n="control.fileTransfer">文件传输</span>
+                            <button class="btn-icon" id="file-close">×</button>
+                        </div>
+                        <div class="file-panel-body" data-i18n="control.fileTransferHint">文件传输功能开发中</div>
+                    </div>
+
+                    <!-- 底部参数抽屉 -->
+                    <div class="settings-drawer hidden" id="settings-drawer">
+                        <div class="drawer-header">
+                            <span data-i18n="control.tools.settings">设置</span>
+                            <button class="btn-icon" id="drawer-close">×</button>
+                        </div>
+                        <div class="form-row">
+                            <label class="label" data-i18n="control.settings.scale">缩放</label>
+                            <input type="range" id="drawer-scale" min="0.5" max="1.5" step="0.1" value="1.0" class="slider">
+                            <span id="drawer-scale-value" class="value">1.0x</span>
+                        </div>
+                        <div class="form-row">
+                            <label class="label" data-i18n="control.settings.bitrate">码率</label>
+                            <input type="range" id="drawer-bitrate" min="1" max="50" step="1" value="8" class="slider">
+                            <span id="drawer-bitrate-value" class="value">8M</span>
+                        </div>
+                        <div class="form-row">
+                            <label class="label" data-i18n="control.settings.fps">帧率</label>
+                            <input type="range" id="drawer-fps" min="10" max="60" step="5" value="30" class="slider">
+                            <span id="drawer-fps-value" class="value">30</span>
+                        </div>
+                        <div class="form-row">
+                            <label class="label" data-i18n="control.settings.privacyScreen">防窥屏</label>
+                            <label class="switch">
+                                <input type="checkbox" id="drawer-privacy">
+                                <span class="slider-toggle"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ 设置页 ============ -->
+            <section class="page page-settings hidden" id="page-settings">
+                <!-- 账户卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="settings.account">账户</span>
+                    </div>
+                    <div id="account-login" class="login-form">
+                        <input type="text" id="username" placeholder="用户名" class="input" data-i18n-ph="settings.username">
+                        <input type="password" id="password" placeholder="密码" class="input" data-i18n-ph="settings.password">
+                        <button id="btn-login" class="btn btn-primary" data-i18n="settings.login">登录</button>
+                    </div>
+                    <div id="account-info" class="account-info hidden">
+                        <div class="info-row">
+                            <span class="label" data-i18n="settings.username">用户名</span>
+                            <span id="display-username" class="value">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label" data-i18n="settings.role">角色</span>
+                            <span id="display-role" class="value">--</span>
+                        </div>
+                        <button id="btn-logout" class="btn btn-secondary" data-i18n="settings.logout">登出</button>
+                    </div>
+                </div>
+
+                <!-- 服务器卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="settings.server">服务器</span>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" id="server-url" placeholder="http://localhost:8080" class="input" data-i18n-ph="settings.serverUrl">
+                        <button id="btn-save-server" class="btn btn-small" data-i18n="settings.saveServer">保存</button>
+                    </div>
+                </div>
+
+                <!-- 视频编码卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="settings.video">视频编码</span>
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="settings.codec">编码器</label>
+                        <select id="codec-video" class="input">
+                            <option value="H264">H.264</option>
+                            <option value="VP8">VP8</option>
+                            <option value="VP9">VP9</option>
+                            <option value="AV1">AV1</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="settings.targetFps">帧率</label>
+                        <input type="number" id="target-fps" min="1" max="60" value="30" class="input">
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="settings.maxBitrate">码率 (Mbps)</label>
+                        <input type="number" id="max-bitrate" min="1" max="50" value="8" class="input">
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="settings.scale">缩放</label>
+                        <input type="range" id="scale" min="0.5" max="1.5" step="0.1" value="1.0" class="slider">
+                        <span id="scale-value" class="value">1.0x</span>
+                    </div>
+                    <button id="btn-save-video" class="btn btn-small" data-i18n="settings.saveVideo">保存视频设置</button>
+                </div>
+
+                <!-- 系统卡片 -->
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title" data-i18n="settings.system">系统</span>
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="settings.autostart">开机自启</label>
+                        <label class="switch">
+                            <input type="checkbox" id="autostart-toggle">
+                            <span class="slider-toggle"></span>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label class="label" data-i18n="settings.language">语言</label>
+                        <select id="language-select" class="input">
+                            <option value="zh-CN">简体中文</option>
+                            <option value="en-US">English</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button id="btn-export-logs" class="btn btn-secondary" data-i18n="settings.exportLogs">导出日志</button>
+                        <button id="btn-exit-app" class="btn btn-danger" data-i18n="settings.exitApp">退出软件</button>
+                    </div>
+                </div>
+            </section>
+        </main>
 
         <!-- 底部状态栏 -->
         <footer class="footer">
-            <span id="footer-status">就绪</span>
+            <span id="footer-status" data-i18n="app.footerReady">就绪</span>
         </footer>
+
+        <!-- 连接请求确认弹窗（用于响应服务端推送的请求） -->
+        <div class="modal hidden" id="confirm-modal">
+            <div class="modal-backdrop"></div>
+            <div class="modal-card">
+                <div class="modal-title" id="confirm-modal-title" data-i18n="controlled.connectionRequest">连接请求</div>
+                <div class="modal-body" id="confirm-modal-body"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-danger btn-small" id="confirm-deny" data-i18n="controlled.deny">拒绝</button>
+                    <button class="btn btn-secondary btn-small" id="confirm-once" data-i18n="controlled.allowOnce">允许一次</button>
+                    <button class="btn btn-primary btn-small" id="confirm-always" data-i18n="controlled.allowAlways">永久允许</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast 通知容器 -->
+        <div class="toast-container" id="toast-container"></div>
     </div>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>

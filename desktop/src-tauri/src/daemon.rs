@@ -421,6 +421,21 @@ impl DaemonState {
         }
     }
 
+    /// 获取当前有效的 JWT 令牌（控制端连接、设备发现等使用）
+    /// 与 current_token() 的区别：本方法不返回错误，仅返回 Option<String>。
+    /// 在控制端连接流程中：匿名模式允许 token 为空，同账号模式需调用方校验非空。
+    pub async fn current_token_optional(&self) -> Option<String> {
+        if self.ensure_init().await.is_err() {
+            return None;
+        }
+        let conn_guard = self.db.lock().await;
+        let conn = match conn_guard.as_ref() {
+            Some(c) => c,
+            None => return None,
+        };
+        auth::current_token(conn).ok().flatten()
+    }
+
     /// 获取当前用户信息（从本地凭据读取）
     pub async fn current_user(&self) -> Result<Option<auth::UserInfo>> {
         self.ensure_init().await?;

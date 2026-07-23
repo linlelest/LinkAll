@@ -1,9 +1,15 @@
 // Tauri 命令模块
 // 定义前端通过 invoke() 调用的命令，桥接设置窗口 UI 与后端守护进程。
 // 命令列表：登录/登出、设备信息、配置读写、服务控制、开机自启、设备重置。
+// 控制端命令：发起连接、发送控制指令、获取统计、断开会话、设备发现、连接请求管理。
 use serde::Serialize;
 use tauri::State;
 
+use crate::control::state::{
+    discover_devices as fetch_discovered_devices,
+    respond_connection_request as submit_connection_response, ConnectionRequest, ControlState,
+    DeviceSummary, PeerStats,
+};
 use crate::daemon::DaemonState;
 
 /// 设备信息响应
@@ -199,4 +205,86 @@ pub async fn export_logs() -> Result<String, String> {
         .join("logs");
     let log_file = log_dir.join("linkall.log");
     std::fs::read_to_string(&log_file).map_err(|e| format!("读取日志失败：{}", e))
+}
+
+// ==================== 控制端命令 ====================
+
+/// 作为控制端发起连接
+/// 通过 ControlState 创建 ControlPeer，建立信令通道并发起 SDP Offer。
+/// - device_id: 目标设备 12 位编号
+/// - device_code: 目标设备 10 位设备码（匿名模式可为空）
+/// - mode: 连接模式 anonymous / same_account / device_code
+#[tauri::command]
+pub async fn connect_to_device(
+    daemon: State<'_, DaemonState>,
+    control: State<'_, ControlState>,
+    device_id: String,
+    device_code: String,
+    mode: String,
+) -> Result<(), String> {
+    control
+        .connect(&daemon, &device_id, &device_code, &mode)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// 通过 DataChannel 发送键鼠/滚轮/手势/设置同步指令（JSON 字符串）
+/// 由前端组装完整的协议信封后透传给被控端。
+#[tauri::command]
+pub async fn send_control_event(
+    control: State<'_, ControlState>,
+    event_json: String,
+) -> Result<(), String> {
+    control
+        .send_control_event(event_json)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// 获取当前控制会话的统计（RTT / 丢包率 / 帧率 / 已连接时长）
+#[tauri::command]
+pub async fn get_peer_stats(control: State<'_, ControlState>) -> Result<PeerStats, String> {
+    Ok(control.stats().await)
+}
+
+/// 断开控制会话（关闭 PeerConnection 与信令通道）
+#[tauri::command]
+pub async fn disconnect_peer(control: State<'_, ControlState>) -> Result<(), String> {
+    control.disconnect().await.map_err(|e| e.to_string())
+}
+
+/// 同账号设备发现：调用服务端 GET /api/devices/discover 返回当前用户在线设备列表
+#[tauri::command]
+pub async fn discover_devices(
+    daemon: State<'_, DaemonState>,
+) -> Result<Vec<DeviceSummary>, String> {
+    fetch_discovered_devices(&daemon)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+/// 获取待确认的连接请求列表（被控端视角，匿名控制请求由信令通道推送并缓存）
+#[tauri::command]
+pub async fn get_connection_requests(
+    control: State<'_, ControlState>,
+) -> Result<Vec<ConnectionRequest>, String> {
+    Ok(control.connection_requests().await)
+}
+
+/// 响应连接请求：调用服务端 POST /api/connect/anonymous/confirm
+/// action: allow_once / allow_always / deny / device_code
+#[tauri::command]
+pub async fn respond_connection_request(
+    daemon: State<'_, DaemonState>,
+    control: State<'_, ControlState>,
+    request_id: String,
+    action: String,
+) -> Result<(), String> {
+    // 调用服务端确认接口
+    submit_connection_response(&daemon, request_id.clone(), action.clone())
+        .await
+        .map_err(|e| e.to_string())?;
+    // 本地缓存移除该请求
+    control.remove_connection_request(&request_id).await;
+    Ok(())
 }
