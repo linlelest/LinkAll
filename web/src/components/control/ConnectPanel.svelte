@@ -7,6 +7,7 @@
   import type { ConnectionMode } from '$lib/webrtc/control';
   import Modal from '$components/ui/Modal.svelte';
   import { toast } from '$lib/stores/toast';
+  import { routerStore } from '$lib/stores/router';
 
   let deviceId = $state('');
   let deviceCode = $state('');
@@ -53,6 +54,10 @@
 
 <div class="connect-page">
   <div class="connect-card card">
+    <button class="back-btn" onclick={() => routerStore.go('dashboard')}>
+      <span class="back-arrow">‹</span>
+      <span>{t('nav.dashboard')}</span>
+    </button>
     <h2 class="title">{t('control.title')}</h2>
 
     <div class="field">
@@ -142,6 +147,25 @@
     font-size: 16px;
     font-weight: 600;
     text-align: center;
+  }
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    padding: 4px 0;
+    font-size: 13px;
+    align-self: flex-start;
+  }
+  .back-btn:hover {
+    color: var(--color-accent);
+  }
+  .back-arrow {
+    font-size: 18px;
+    line-height: 1;
   }
   .field {
     display: flex;

@@ -1,18 +1,17 @@
 <script lang="ts">
-  // 设备列表：卡片/列表视图切换、在线呼吸灯、复制编号/名称、一键踢出。
+  // 我的设备列表：卡片/列表视图切换、在线呼吸灯、复制编号/名称、连接。
+  // 所有用户（含超管）均通过 /api/devices/discover 获取自己的设备，按 owner 隔离。
   import { t } from '$lib/i18n';
   import { devicesStore, type DeviceItem } from '$lib/stores/devices';
-  import { listDevices, kickDevice } from '$lib/api/devices';
+  import { discoverDevices } from '$lib/api/devices';
   import { ApiError } from '$lib/api/client';
   import { toast } from '$lib/stores/toast';
   import { copyText } from '$lib/utils/clipboard';
   import { formatRelative } from '$lib/utils/format';
+  import { routerStore } from '$lib/stores/router';
   import BreathingLight from '$components/ui/BreathingLight.svelte';
-  import Modal from '$components/ui/Modal.svelte';
 
   let loading = $state(false);
-  let kickTarget = $state<DeviceItem | null>(null);
-  let confirmOpen = $state(false);
 
   let store = $derived(devicesStore);
 
@@ -20,8 +19,8 @@
     loading = true;
     devicesStore.setLoading(true);
     try {
-      const { data, meta } = await listDevices(200, 0, devicesStore.onlineOnly);
-      devicesStore.set(data, meta?.total ?? data.length);
+      const { data, total } = await discoverDevices(devicesStore.onlineOnly);
+      devicesStore.set(data, total);
     } catch (e) {
       const err = e as ApiError;
       toast.error(err.message || t('common.failed'));
@@ -37,24 +36,11 @@
     else toast.error(t('common.failed'));
   }
 
-  function askKick(d: DeviceItem) {
-    kickTarget = d;
-    confirmOpen = true;
-  }
-
-  async function confirmKick() {
-    if (!kickTarget) return;
-    try {
-      await kickDevice(kickTarget.deviceId);
-      devicesStore.removeByKick(kickTarget.deviceId);
-      toast.success(t('devices.kicked'));
-    } catch (e) {
-      const err = e as ApiError;
-      toast.error(t('devices.kick_failed') + ': ' + err.message);
-    } finally {
-      confirmOpen = false;
-      kickTarget = null;
-    }
+  // 连接设备：复制编号并跳转到远程控制页
+  function connectDevice(d: DeviceItem) {
+    void copyText(d.deviceId);
+    routerStore.go('control');
+    toast.success(t('devices.copied_goto_control'));
   }
 
   function statusKey(s: string): string {
@@ -124,8 +110,8 @@
           </div>
           <div class="card-actions">
             <button class="btn" onclick={() => doCopy(d.deviceName || d.deviceId)}>{t('devices.copy_name')}</button>
-            <button class="btn btn-danger" disabled={d.onlineStatus !== 'online'} onclick={() => askKick(d)}>
-              {t('common.kick')}
+            <button class="btn btn-primary" disabled={d.onlineStatus !== 'online'} onclick={() => connectDevice(d)}>
+              {t('devices.connect')}
             </button>
           </div>
         </div>
@@ -157,8 +143,8 @@
               <td class="mono">{d.version || '-'}</td>
               <td>{formatRelative(d.lastSeen)}</td>
               <td>
-                <button class="btn btn-danger btn-sm" disabled={d.onlineStatus !== 'online'} onclick={() => askKick(d)}>
-                  {t('common.kick')}
+                <button class="btn btn-primary btn-sm" disabled={d.onlineStatus !== 'online'} onclick={() => connectDevice(d)}>
+                  {t('devices.connect')}
                 </button>
               </td>
             </tr>
@@ -168,14 +154,6 @@
     </div>
   {/if}
 </div>
-
-<Modal bind:open={confirmOpen} title={t('devices.kick_confirm', { id: kickTarget?.deviceId ?? '' })}>
-  <p class="confirm-body">{t('devices.kick_confirm', { id: kickTarget?.deviceId ?? '' })}</p>
-  {#snippet footer()}
-    <button class="btn" onclick={() => (confirmOpen = false)}>{t('common.cancel')}</button>
-    <button class="btn btn-danger" onclick={confirmKick}>{t('common.confirm')}</button>
-  {/snippet}
-</Modal>
 
 <style>
   .device-page {
@@ -204,8 +182,8 @@
   }
   .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
   }
   .device-card {
     padding: 12px;
@@ -273,9 +251,12 @@
   }
   .list-wrap {
     overflow: auto;
+    /* 移动端横向滚动表格 */
+    -webkit-overflow-scrolling: touch;
   }
   .list-table {
     width: 100%;
+    min-width: 600px;
     border-collapse: collapse;
     font-size: 12px;
   }

@@ -134,5 +134,31 @@
     "error": "错误",
     "loading": "加载中...",
     "unknown": "未知"
+  },
+  "setup": {
+    "title": "欢迎使用 LinkALL",
+    "subtitle": "首次启动，请完成以下设置",
+    "stepLanguage": "语言",
+    "stepServer": "服务器",
+    "stepLogin": "登录",
+    "languageTitle": "选择语言",
+    "languageHint": "可随时在设置中修改",
+    "serverTitle": "服务器地址",
+    "serverHint": "留空则使用默认地址（相对路径）",
+    "serverPlaceholder": "http://localhost:8080",
+    "loginTitle": "登录账号",
+    "loginHint": "登录后才能进入主界面",
+    "username": "用户名",
+    "password": "密码",
+    "next": "下一步",
+    "prev": "上一步",
+    "finish": "完成",
+    "login": "登录",
+    "loggingIn": "登录中...",
+    "loginSuccess": "登录成功",
+    "loginFailed": "登录失败",
+    "inputRequired": "请输入用户名和密码",
+    "welcomeBack": "欢迎回来",
+    "needLogin": "未检测到登录状态，请先登录"
   }
 }

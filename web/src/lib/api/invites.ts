@@ -12,16 +12,19 @@ export interface InviteCode {
   usedBy?: number;
   usedAt?: number;
   note?: string;
+  maxUses: number;
+  usedCount: number;
 }
 
 export function generateInvites(
   count = 1,
   ttlHours = 168,
   note = '',
+  maxUses = 1,
 ): Promise<{ codes: string[]; count: number }> {
   return request<{ codes: string[]; count: number }>('/api/admin/invites', {
     method: 'POST',
-    body: { count, ttlHours, note },
+    body: { count, ttlHours, note, maxUses },
   });
 }
 

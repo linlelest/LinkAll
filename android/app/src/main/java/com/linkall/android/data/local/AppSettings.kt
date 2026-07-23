@@ -39,6 +39,9 @@ class AppSettings(context: Context) {
     /** 被控端：远程控制总开关 */
     val allowRemoteControl: Flow<Boolean> = dataStore.data.map { it[KEY_ALLOW_REMOTE] ?: true }
 
+    /** 首次启动引导是否已完成 */
+    val onboardingCompleted: Flow<Boolean> = dataStore.data.map { it[KEY_ONBOARDING] ?: false }
+
     suspend fun setLanguage(value: String) = dataStore.edit { it[KEY_LANGUAGE] = value }
     suspend fun setServerAddress(value: String) = dataStore.edit { it[KEY_SERVER] = value }
     suspend fun setConnectionTimeout(value: Int) = dataStore.edit { it[KEY_TIMEOUT] = value }
@@ -46,6 +49,7 @@ class AppSettings(context: Context) {
     suspend fun setAllowAnonymous(value: Boolean) = dataStore.edit { it[KEY_ALLOW_ANON] = value }
     suspend fun setAllowDeviceCode(value: Boolean) = dataStore.edit { it[KEY_ALLOW_CODE] = value }
     suspend fun setAllowRemoteControl(value: Boolean) = dataStore.edit { it[KEY_ALLOW_REMOTE] = value }
+    suspend fun setOnboardingCompleted(value: Boolean) = dataStore.edit { it[KEY_ONBOARDING] = value }
 
     companion object {
         private val KEY_LANGUAGE = stringPreferencesKey("language")
@@ -55,5 +59,6 @@ class AppSettings(context: Context) {
         private val KEY_ALLOW_ANON = booleanPreferencesKey("allow_anonymous")
         private val KEY_ALLOW_CODE = booleanPreferencesKey("allow_device_code")
         private val KEY_ALLOW_REMOTE = booleanPreferencesKey("allow_remote_control")
+        private val KEY_ONBOARDING = booleanPreferencesKey("onboarding_completed")
     }
 }

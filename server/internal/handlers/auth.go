@@ -150,6 +150,11 @@ func (d *Deps) Register(c *fiber.Ctx) error {
 		return failBadRequest(c, "邀请码不能为空")
 	}
 
+	// 检查邀请码系统是否启用
+	if !d.Invites.IsEnabled() {
+		return fail(c, fiber.StatusForbidden, CodeInviteInvalid, "邀请码系统已关闭，暂不接受注册")
+	}
+
 	// 检查用户名是否已存在
 	var existing int
 	err := d.DB.QueryRow(`SELECT COUNT(*) FROM users WHERE username = ?`, req.Username).Scan(&existing)
@@ -173,17 +178,18 @@ func (d *Deps) Register(c *fiber.Ctx) error {
 	}
 	defer tx.Rollback()
 
-	// 校验邀请码（行级锁）
+	// 校验邀请码（行级锁）+ 基于 used_count/max_uses
 	var (
 		inviteID   int64
 		expiresAt  int64
-		used       int
+		maxUses    int
+		usedCount  int
 		revoked    int
 	)
 	err = tx.QueryRow(
-		`SELECT id, expires_at, used, revoked FROM invite_codes WHERE code = ?`,
+		`SELECT id, expires_at, max_uses, used_count, revoked FROM invite_codes WHERE code = ?`,
 		req.InviteCode,
-	).Scan(&inviteID, &expiresAt, &used, &revoked)
+	).Scan(&inviteID, &expiresAt, &maxUses, &usedCount, &revoked)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return fail(c, fiber.StatusBadRequest, CodeInviteInvalid, "邀请码无效")
@@ -193,10 +199,14 @@ func (d *Deps) Register(c *fiber.Ctx) error {
 	if revoked == 1 {
 		return fail(c, fiber.StatusBadRequest, CodeInviteInvalid, "邀请码已被吊销")
 	}
-	if used == 1 {
-		return fail(c, fiber.StatusBadRequest, CodeInviteUsed, "邀请码已被使用")
+	if usedCount >= maxUses {
+		// 已达上限，从数据库删除
+		_, _ = tx.Exec(`DELETE FROM invite_codes WHERE id = ?`, inviteID)
+		return fail(c, fiber.StatusBadRequest, CodeInviteUsed, "邀请码已达使用次数上限")
 	}
 	if time.Now().Unix() > expiresAt {
+		// 已过期，从数据库删除
+		_, _ = tx.Exec(`DELETE FROM invite_codes WHERE id = ?`, inviteID)
 		return fail(c, fiber.StatusBadRequest, CodeInviteExpired, "邀请码已过期")
 	}
 
@@ -210,13 +220,22 @@ func (d *Deps) Register(c *fiber.Ctx) error {
 	}
 	userID, _ := res.LastInsertId()
 
-	// 标记邀请码已使用
+	// 原子递增 used_count，达上限则从数据库删除
 	_, err = tx.Exec(
-		`UPDATE invite_codes SET used = 1, used_by = ?, used_at = ? WHERE id = ? AND used = 0`,
+		`UPDATE invite_codes
+		 SET used_count = used_count + 1,
+		     used_by = ?,
+		     used_at = ?,
+		     used = CASE WHEN used_count + 1 >= max_uses THEN 1 ELSE used END
+		 WHERE id = ? AND used_count < max_uses`,
 		userID, time.Now().Unix(), inviteID,
 	)
 	if err != nil {
 		return failInternal(c, "更新邀请码状态失败")
+	}
+	// 达到使用次数上限则删除（让该邀请码不可再用）
+	if usedCount+1 >= maxUses {
+		_, _ = tx.Exec(`DELETE FROM invite_codes WHERE id = ?`, inviteID)
 	}
 
 	if err := tx.Commit(); err != nil {

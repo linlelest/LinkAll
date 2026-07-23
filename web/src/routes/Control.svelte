@@ -107,7 +107,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 12px;
+    gap: 6px;
+    padding: 6px 10px;
+    padding-top: calc(6px + env(safe-area-inset-top, 0));
     background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
     pointer-events: none;
   }
@@ -116,7 +118,12 @@
     pointer-events: auto;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    min-width: 0;
+  }
+  .topbar-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
   .topbar-info .mono {
     font-size: 11px;

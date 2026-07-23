@@ -813,6 +813,136 @@ select.input {
     display: none !important;
 }
 
+/* ============ 首次启动引导覆盖层 ============ */
+.setup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+}
+
+.setup-card {
+    width: 100%;
+    max-width: 360px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.setup-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.setup-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.setup-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+}
+
+.setup-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* 步骤指示器 */
+.setup-steps {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+}
+
+.setup-step-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    transition: all 0.2s;
+}
+
+.setup-step-dot.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.setup-step-dot.done {
+    background: var(--accent-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.setup-step-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    border-radius: 1px;
+}
+
+/* 步骤页面 */
+.setup-page {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: fadeIn 0.2s ease;
+}
+
+.setup-page-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.setup-page-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.setup-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setup-buttons {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.setup-buttons .btn {
+    flex: 1;
+}
+
+
 /* ============ 滚动条 ============ */
 ::-webkit-scrollbar {
     width: 6px;

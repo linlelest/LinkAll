@@ -25,8 +25,14 @@
 
   <main class="main">
     {#if isLoggedIn}
-      <header class="topbar desktop-only">
+      <header class="topbar">
         <h1 class="page-title">{title}</h1>
+        <div class="topbar-right mobile-only">
+          <span class="user-chip">{authStore.user?.username}</span>
+          <button class="btn btn-sm btn-ghost logout-mini" onclick={() => { authStore.logout(); routerStore.go('login'); }}>
+            {t('nav.logout')}
+          </button>
+        </div>
       </header>
     {/if}
     <div class="content">
@@ -67,7 +73,11 @@
     min-height: 48px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 0 16px;
+    /* 适配刘海屏顶部安全区 */
+    padding-top: env(safe-area-inset-top, 0);
+    height: calc(48px + env(safe-area-inset-top, 0));
     border-bottom: 1px solid var(--color-border-soft);
     background: var(--color-bg-soft);
   }
@@ -76,11 +86,30 @@
     font-size: 15px;
     font-weight: 600;
   }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .user-chip {
+    font-size: 12px;
+    color: var(--color-fg-muted);
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .logout-mini {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
   .content {
     flex: 1 1 auto;
     overflow: auto;
     padding: 16px;
     min-height: 0;
+    /* 横向溢出保护：避免子元素过宽导致整页横向滚动 */
+    overflow-x: auto;
   }
 
   /* 容器查询：宽度 <= 760px 切换为移动布局 */

@@ -17,6 +17,7 @@ type SecuritySettings struct {
 	ConnectionPasswordSet bool     `json:"connectionPasswordSet"`
 	MaxConcurrentSessions int      `json:"maxConcurrentSessions"`
 	DataRetentionDays     int      `json:"dataRetentionDays"`
+	InviteEnabled         bool     `json:"inviteEnabled"` // 邀请码系统开关
 	UpdatedAt             int64    `json:"updatedAt"`
 }
 
@@ -35,17 +36,18 @@ func (d *Deps) GetSecurity(c *fiber.Ctx) error {
 		connPwHash            string
 		maxSessions           int
 		retentionDays         int
+		inviteEnabled         int
 		updatedAt             int64
 	)
 	err := d.DB.QueryRow(
 		`SELECT force_https, allow_anonymous, allow_device_code, allow_remote_control,
 		        anonymous_whitelist, connection_password_hash,
-		        max_concurrent_sessions, data_retention_days, updated_at
+		        max_concurrent_sessions, data_retention_days, invite_enabled, updated_at
 		 FROM security_settings WHERE id = 1`,
 	).Scan(
 		&forceHTTPS, &allowAnon, &allowDevCode, &allowRemote,
 		&anonWhitelistJSON, &connPwHash,
-		&maxSessions, &retentionDays, &updatedAt,
+		&maxSessions, &retentionDays, &inviteEnabled, &updatedAt,
 	)
 	if err != nil {
 		return failInternal(c, "查询安全设置失败")
@@ -66,6 +68,7 @@ func (d *Deps) GetSecurity(c *fiber.Ctx) error {
 		ConnectionPasswordSet: connPwHash != "",
 		MaxConcurrentSessions: maxSessions,
 		DataRetentionDays:     retentionDays,
+		InviteEnabled:         inviteEnabled == 1,
 		UpdatedAt:             updatedAt,
 	})
 }
@@ -80,6 +83,7 @@ type UpdateSecurityRequest struct {
 	ConnectionPassword    *string   `json:"connectionPassword,omitempty"` // 明文，服务端哈希后存储
 	MaxConcurrentSessions *int      `json:"maxConcurrentSessions,omitempty"`
 	DataRetentionDays     *int      `json:"dataRetentionDays,omitempty"`
+	InviteEnabled         *bool     `json:"inviteEnabled,omitempty"` // 邀请码系统开关
 }
 
 // UpdateSecurity 更新全局安全设置（管理员）。
@@ -149,6 +153,10 @@ func (d *Deps) UpdateSecurity(c *fiber.Ctx) error {
 		}
 		sets = append(sets, "data_retention_days = ?")
 		args = append(args, *req.DataRetentionDays)
+	}
+	if req.InviteEnabled != nil {
+		sets = append(sets, "invite_enabled = ?")
+		args = append(args, boolToInt(*req.InviteEnabled))
 	}
 
 	if len(sets) == 0 {

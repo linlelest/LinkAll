@@ -6,15 +6,19 @@
   import { connectionStore } from '$lib/stores/connection';
 
   let current = $derived(routerStore.current);
+  let isAdmin = $derived(authStore.isAdmin);
 
-  const navItems: { route: RouteName; key: string; icon: string }[] = [
+  // 普通用户隐藏公告菜单（公告通过浮窗自动展示）
+  const navItems: { route: RouteName; key: string; icon: string; adminOnly?: boolean }[] = [
     { route: 'dashboard', key: 'nav.dashboard', icon: '▦' },
     { route: 'devices', key: 'nav.devices', icon: '▥' },
     { route: 'control', key: 'nav.control', icon: '◈' },
-    { route: 'announcements', key: 'nav.announcements', icon: '☰' },
+    { route: 'announcements', key: 'nav.announcements', icon: '☰', adminOnly: true },
     { route: 'settings', key: 'nav.settings', icon: '⚙' },
     { route: 'ota', key: 'nav.ota', icon: '↑' },
   ];
+
+  let visibleItems = $derived(navItems.filter((i) => !i.adminOnly || isAdmin));
 
   function logout() {
     authStore.logout();
@@ -31,7 +35,7 @@
   </div>
 
   <nav class="nav">
-    {#each navItems as item}
+    {#each visibleItems as item}
       <button
         class="nav-item"
         class:active={current === item.route}

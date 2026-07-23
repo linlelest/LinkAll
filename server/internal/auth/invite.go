@@ -31,7 +31,9 @@ type InviteCode struct {
 	ExpiresAt  int64  `json:"expiresAt"`
 	UsedAt     *int64 `json:"usedAt,omitempty"`
 	Revoked    bool   `json:"revoked"`
-	Used       bool   `json:"used"`
+	Used       bool   `json:"used"` // used_count >= max_uses 时为 true
+	MaxUses    int    `json:"maxUses"`
+	UsedCount  int    `json:"usedCount"`
 	CreatedAt  int64  `json:"createdAt"`
 	Note       string `json:"note,omitempty"`
 }
@@ -43,6 +45,7 @@ type GenerateOptions struct {
 	CreatedBy  int64         // 创建者 user_id
 	Note       string        // 备注
 	CodeLength int           // 邀请码字符长度（默认 10）
+	MaxUses    int           // 最大使用次数（默认 1，达上限自动删除）
 }
 
 // GenerateResult 单次生成结果。
@@ -69,6 +72,9 @@ func (m *InviteManager) Generate(opts GenerateOptions) (*GenerateResult, error) 
 	if opts.CreatedBy <= 0 {
 		return nil, errors.New("createdBy 必填")
 	}
+	if opts.MaxUses <= 0 {
+		opts.MaxUses = 1 // 默认单次使用
+	}
 
 	now := time.Now()
 	expiresAt := now.Add(opts.TTL).Unix()
@@ -87,9 +93,9 @@ func (m *InviteManager) Generate(opts GenerateOptions) (*GenerateResult, error) 
 		}
 		hash := sha256Hex(code)
 		_, err = tx.Exec(
-			`INSERT INTO invite_codes (code, code_hash, created_by, expires_at, note)
-			 VALUES (?, ?, ?, ?, ?)`,
-			code, hash, opts.CreatedBy, expiresAt, opts.Note,
+			`INSERT INTO invite_codes (code, code_hash, created_by, expires_at, note, max_uses, used_count)
+			 VALUES (?, ?, ?, ?, ?, ?, 0)`,
+			code, hash, opts.CreatedBy, expiresAt, opts.Note, opts.MaxUses,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("插入邀请码失败: %w", err)
@@ -137,19 +143,20 @@ func (m *InviteManager) RevokeByID(id int64) error {
 }
 
 // Consume 消费邀请码（注册时调用）。返回创建者 user_id 与邀请码 id。
-// 在事务中调用更安全（由调用方包裹）。
+// 基于 used_count/max_uses：递增 used_count，达上限或过期自动从数据库删除。
 func (m *InviteManager) Consume(code string, usedBy int64) (int64, int64, error) {
 	var (
-		id        int64
-		createdBy int64
-		expiresAt int64
-		used      int
-		revoked   int
+		id          int64
+		createdBy   int64
+		expiresAt   int64
+		maxUses     int
+		usedCount   int
+		revoked     int
 	)
 	err := m.db.QueryRow(
-		`SELECT id, created_by, expires_at, used, revoked FROM invite_codes WHERE code = ?`,
+		`SELECT id, created_by, expires_at, max_uses, used_count, revoked FROM invite_codes WHERE code = ?`,
 		code,
-	).Scan(&id, &createdBy, &expiresAt, &used, &revoked)
+	).Scan(&id, &createdBy, &expiresAt, &maxUses, &usedCount, &revoked)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, 0, errors.New("邀请码无效")
@@ -159,19 +166,34 @@ func (m *InviteManager) Consume(code string, usedBy int64) (int64, int64, error)
 	if revoked == 1 {
 		return 0, 0, errors.New("邀请码已被吊销")
 	}
-	if used == 1 {
-		return 0, 0, errors.New("邀请码已被使用")
-	}
 	if time.Now().Unix() > expiresAt {
+		// 已过期，从数据库删除
+		_, _ = m.db.Exec(`DELETE FROM invite_codes WHERE id = ?`, id)
 		return 0, 0, errors.New("邀请码已过期")
 	}
-
-	_, err = m.db.Exec(
-		`UPDATE invite_codes SET used = 1, used_by = ?, used_at = ? WHERE id = ? AND used = 0`,
+	if usedCount >= maxUses {
+		// 已达上限，从数据库删除
+		_, _ = m.db.Exec(`DELETE FROM invite_codes WHERE id = ?`, id)
+		return 0, 0, errors.New("邀请码已达使用次数上限")
+	}
+	// 原子递增 used_count（仅当未达上限）
+	res, err := m.db.Exec(
+		`UPDATE invite_codes SET used_count = used_count + 1, used_by = ?, used_at = ?, used = CASE WHEN used_count + 1 >= max_uses THEN 1 ELSE used END
+		 WHERE id = ? AND used_count < max_uses`,
 		usedBy, time.Now().Unix(), id,
 	)
 	if err != nil {
-		return 0, 0, fmt.Errorf("标记邀请码已使用失败: %w", err)
+		return 0, 0, fmt.Errorf("消费邀请码失败: %w", err)
+	}
+	n, _ := res.RowsAffected()
+	if n == 0 {
+		// 并发竞态：已被用完，删除
+		_, _ = m.db.Exec(`DELETE FROM invite_codes WHERE id = ?`, id)
+		return 0, 0, errors.New("邀请码已达使用次数上限")
+	}
+	// 达到使用次数上限则从数据库删除
+	if usedCount+1 >= maxUses {
+		_, _ = m.db.Exec(`DELETE FROM invite_codes WHERE id = ?`, id)
 	}
 	return createdBy, id, nil
 }
@@ -188,7 +210,7 @@ func (m *InviteManager) List(limit, offset int) ([]InviteCode, int, error) {
 
 	rows, err := m.db.Query(
 		`SELECT id, code, created_by, COALESCE(used_by,0), expires_at, COALESCE(used_at,0),
-		        revoked, used, created_at, COALESCE(note,'')
+		        revoked, used, max_uses, used_count, created_at, COALESCE(note,'')
 		 FROM invite_codes ORDER BY id DESC LIMIT ? OFFSET ?`,
 		limit, offset,
 	)
@@ -203,11 +225,11 @@ func (m *InviteManager) List(limit, offset int) ([]InviteCode, int, error) {
 		var usedBy, usedAt int64
 		if err := rows.Scan(
 			&ic.ID, &ic.Code, &ic.CreatedBy, &usedBy, &ic.ExpiresAt, &usedAt,
-			&ic.Revoked, &ic.Used, &ic.CreatedAt, &ic.Note,
+			&ic.Revoked, &ic.Used, &ic.MaxUses, &ic.UsedCount, &ic.CreatedAt, &ic.Note,
 		); err != nil {
 			return nil, 0, err
 		}
-		if ic.Used {
+		if ic.UsedCount > 0 {
 			ub := usedBy
 			ic.UsedBy = &ub
 		}
@@ -215,9 +237,34 @@ func (m *InviteManager) List(limit, offset int) ([]InviteCode, int, error) {
 			ua := usedAt
 			ic.UsedAt = &ua
 		}
+		// used 判断：used_count >= max_uses 视为已用尽
+		ic.Used = ic.UsedCount >= ic.MaxUses
 		out = append(out, ic)
 	}
 	return out, total, rows.Err()
+}
+
+// CleanupExpired 清理过期且未用完的邀请码（定时调用）。
+func (m *InviteManager) CleanupExpired() (int64, error) {
+	res, err := m.db.Exec(
+		`DELETE FROM invite_codes WHERE expires_at < ? AND used_count < max_uses`,
+		time.Now().Unix(),
+	)
+	if err != nil {
+		return 0, err
+	}
+	n, _ := res.RowsAffected()
+	return n, nil
+}
+
+// IsEnabled 查询邀请码系统是否启用。
+func (m *InviteManager) IsEnabled() bool {
+	var enabled int
+	err := m.db.QueryRow(`SELECT COALESCE(invite_enabled, 1) FROM security_settings WHERE id = 1`).Scan(&enabled)
+	if err != nil {
+		return true // 默认启用
+	}
+	return enabled == 1
 }
 
 // Export 批量导出邀请码为 CSV 字节切片。
@@ -226,7 +273,7 @@ func (m *InviteManager) Export() ([]byte, error) {
 	rows, err := m.db.Query(
 		`SELECT id, code, created_by, expires_at, created_at, COALESCE(note,'')
 		 FROM invite_codes
-		 WHERE used = 0 AND revoked = 0 AND expires_at > ?
+		 WHERE used_count < max_uses AND revoked = 0 AND expires_at > ?
 		 ORDER BY id ASC`,
 		time.Now().Unix(),
 	)

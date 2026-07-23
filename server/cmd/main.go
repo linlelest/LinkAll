@@ -367,6 +367,13 @@ func runServer(flags []string) {
 	hasher := auth.NewPasswordHasher(nil)
 	inviteMgr := auth.NewInviteManager(database)
 
+	// 启动时清理过期邀请码
+	if n, err := inviteMgr.CleanupExpired(); err != nil {
+		slog.Warn("[server] 清理过期邀请码失败", "err", err)
+	} else if n > 0 {
+		slog.Info("[server] 已清理过期邀请码", "count", n)
+	}
+
 	// 创建 WebRTC 信令服务器
 	hub := webrtc.NewHub(database)
 	iceConfig := &webrtc.ICEConfig{

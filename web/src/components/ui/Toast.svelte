@@ -26,11 +26,21 @@
     position: fixed;
     top: 12px;
     right: 12px;
+    /* 适配刘海屏顶部安全区 */
+    top: calc(12px + env(safe-area-inset-top, 0));
     z-index: 2000;
     display: flex;
     flex-direction: column;
     gap: 8px;
     max-width: 340px;
+  }
+  /* 移动端 Toast 占满宽度减边距 */
+  @media (max-width: 480px) {
+    .toast-container {
+      left: 12px;
+      right: 12px;
+      max-width: none;
+    }
   }
   .toast {
     display: flex;

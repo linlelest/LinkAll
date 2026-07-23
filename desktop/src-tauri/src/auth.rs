@@ -13,9 +13,13 @@ struct LoginRequest<'a> {
 }
 
 /// 服务端统一响应外层
+// 注意：服务端的 code 字段是字符串类型（如 "ERR_OK" / "ERR_AUTH_FAILED"），
+// 而非整数。早期版本误将 code 声明为 i32，导致登录成功响应（HTTP 200 +
+// body code="ERR_OK"）反序列化失败，进而被前端当作错误弹出。这里改为
+// String 并在下文按 "ERR_OK" 判断成功。
 #[derive(Debug, Deserialize)]
 struct ApiResponse<T> {
-    code: i32,
+    code: String,
     message: Option<String>,
     data: Option<T>,
 }
@@ -76,7 +80,8 @@ pub async fn login(
     let body = resp.text().await.unwrap_or_default();
     let api: ApiResponse<LoginData> = serde_json::from_str(&body)
         .with_context(|| format!("解析登录响应失败 (HTTP {}): {}", status, body))?;
-    if api.code != 0 {
+    // 服务端约定 code == "ERR_OK" 表示业务成功；其余均视为失败（即使 HTTP 200）
+    if api.code != "ERR_OK" {
         return Err(anyhow!("{}", api.message.unwrap_or_else(|| "登录失败".into())));
     }
     let data = api.data.ok_or_else(|| anyhow!("登录响应缺少数据"))?;

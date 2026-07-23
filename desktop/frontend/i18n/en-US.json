@@ -134,5 +134,31 @@
     "error": "Error",
     "loading": "Loading...",
     "unknown": "Unknown"
+  },
+  "setup": {
+    "title": "Welcome to LinkALL",
+    "subtitle": "Complete the following setup to get started",
+    "stepLanguage": "Language",
+    "stepServer": "Server",
+    "stepLogin": "Login",
+    "languageTitle": "Choose Language",
+    "languageHint": "Can be changed later in Settings",
+    "serverTitle": "Server URL",
+    "serverHint": "Leave empty to use default (relative path)",
+    "serverPlaceholder": "http://localhost:8080",
+    "loginTitle": "Login Account",
+    "loginHint": "Login is required before entering the main interface",
+    "username": "Username",
+    "password": "Password",
+    "next": "Next",
+    "prev": "Back",
+    "finish": "Finish",
+    "login": "Login",
+    "loggingIn": "Logging in...",
+    "loginSuccess": "Login successful",
+    "loginFailed": "Login failed",
+    "inputRequired": "Please enter username and password",
+    "welcomeBack": "Welcome back",
+    "needLogin": "Not logged in, please login first"
   }
 }

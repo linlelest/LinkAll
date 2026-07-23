@@ -64,11 +64,7 @@ fun ControlledHomeScreen(
     val context = LocalContext.current
 
     Column(modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
-        ScreenHeader(title = stringResource(R.string.controlled_title)) {
-            OutlinedButton(onClick = { nav.navigateControlled(ControlledScreen.PERMISSIONS) }) {
-                Text(stringResource(R.string.permission_title))
-            }
-        }
+        ScreenHeader(title = stringResource(R.string.controlled_title))
 
         // 服务状态卡片
         Card(

@@ -10,6 +10,7 @@ export interface SecuritySettings {
   connectionPasswordSet: boolean;
   maxConcurrentSessions: number;
   dataRetentionDays: number;
+  inviteEnabled: boolean;
   updatedAt: number;
 }
 
@@ -22,6 +23,7 @@ export interface UpdateSecurityInput {
   connectionPassword?: string;
   maxConcurrentSessions?: number;
   dataRetentionDays?: number;
+  inviteEnabled?: boolean;
 }
 
 export function getSecurity(): Promise<SecuritySettings> {

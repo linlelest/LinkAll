@@ -11,9 +11,10 @@ import (
 
 // GenerateInviteCodesRequest 生成邀请码请求。
 type GenerateInviteCodesRequest struct {
-	Count int    `json:"count" xml:"count" form:"count"`
-	TTLHours int `json:"ttlHours" xml:"ttlHours" form:"ttlHours"`
-	Note   string `json:"note" xml:"note" form:"note"`
+	Count    int    `json:"count" xml:"count" form:"count"`
+	TTLHours int    `json:"ttlHours" xml:"ttlHours" form:"ttlHours"`
+	MaxUses  int    `json:"maxUses" xml:"maxUses" form:"maxUses"` // 最大使用次数（默认 1，达上限自动删除）
+	Note     string `json:"note" xml:"note" form:"note"`
 }
 
 // GenerateInviteCodes 生成邀请码（管理员）。
@@ -27,6 +28,7 @@ func (d *Deps) GenerateInviteCodes(c *fiber.Ctx) error {
 		// 兼容 form 表单
 		req.Count, _ = strconv.Atoi(c.FormValue("count"))
 		req.TTLHours, _ = strconv.Atoi(c.FormValue("ttlHours"))
+		req.MaxUses, _ = strconv.Atoi(c.FormValue("maxUses"))
 		req.Note = c.FormValue("note")
 	}
 	if req.Count <= 0 {
@@ -37,6 +39,9 @@ func (d *Deps) GenerateInviteCodes(c *fiber.Ctx) error {
 	}
 	if req.TTLHours <= 0 {
 		req.TTLHours = 24 * 7 // 默认 7 天
+	}
+	if req.MaxUses < 0 {
+		return failBadRequest(c, "maxUses 不能为负数")
 	}
 	uid := getUserIDFromContext(c)
 	if uid == 0 {
@@ -49,6 +54,7 @@ func (d *Deps) GenerateInviteCodes(c *fiber.Ctx) error {
 		TTL:        time.Duration(req.TTLHours) * time.Hour,
 		CreatedBy:  uid,
 		Note:       req.Note,
+		MaxUses:    req.MaxUses,
 	})
 	if err != nil {
 		return failInternal(c, "生成邀请码失败: "+err.Error())

@@ -15,6 +15,7 @@ import com.linkall.android.data.signaling.SignalingClient
 import com.linkall.android.ui.screen.controlled.ControlledViewModel
 import com.linkall.android.ui.screen.controller.ControllerViewModel
 import com.linkall.android.ui.screen.manage.ManageViewModel
+import com.linkall.android.ui.screen.onboarding.OnboardingViewModel
 import com.linkall.android.webrtc.ControlMessageBuilder
 import com.linkall.android.webrtc.WebRtcInitializer
 import okhttp3.OkHttpClient
@@ -68,4 +69,5 @@ val appModule = module {
             storage = get()
         )
     }
+    viewModel { OnboardingViewModel(get(), get()) }
 }

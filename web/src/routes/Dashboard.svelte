@@ -8,7 +8,6 @@
   import { formatBytes, formatDuration } from '$lib/utils/format';
   import { ApiError } from '$lib/api/client';
   import { authStore } from '$lib/stores/auth';
-  import Toggle from '$components/ui/Toggle.svelte';
 
   let info = $state<ServerInfo | null>(null);
   let security = $state<SecuritySettings | null>(null);
@@ -97,10 +96,6 @@
       <h3 class="section-title">{t('dashboard.security_settings')}</h3>
       {#if security}
         <div class="sec-grid">
-          <div class="sec-row"><span>{t('dashboard.force_https')}</span><Toggle checked={security.forceHttps} /></div>
-          <div class="sec-row"><span>{t('dashboard.allow_anonymous')}</span><Toggle checked={security.allowAnonymous} /></div>
-          <div class="sec-row"><span>{t('dashboard.allow_device_code')}</span><Toggle checked={security.allowDeviceCode} /></div>
-          <div class="sec-row"><span>{t('dashboard.allow_remote_control')}</span><Toggle checked={security.allowRemoteControl} /></div>
           <div class="sec-row"><span>{t('dashboard.max_sessions')}</span><span class="mono">{security.maxConcurrentSessions}</span></div>
           <div class="sec-row"><span>{t('dashboard.retention_days')}</span><span class="mono">{security.dataRetentionDays}</span></div>
           <div class="sec-row"><span>{t('dashboard.connection_password')}</span>
@@ -108,16 +103,6 @@
               {security.connectionPasswordSet ? t('dashboard.connection_password_set') : t('dashboard.connection_password_unset')}
             </span>
           </div>
-          {#if security.anonymousWhitelist.length > 0}
-            <div class="sec-row col">
-              <span>{t('dashboard.anon_whitelist')}</span>
-              <div class="whitelist">
-                {#each security.anonymousWhitelist as ip}
-                  <span class="tag mono">{ip}</span>
-                {/each}
-              </div>
-            </div>
-          {/if}
         </div>
       {/if}
     </section>
@@ -175,8 +160,8 @@
   }
   .stat-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
   }
   .stat-cell {
     background: var(--color-bg-soft);
@@ -209,7 +194,7 @@
   }
   .sec-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 8px;
   }
   .sec-row {
@@ -245,7 +230,7 @@
   }
   .env-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 4px;
   }
   .env-row {

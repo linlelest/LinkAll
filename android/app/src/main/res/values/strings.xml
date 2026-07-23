@@ -99,6 +99,17 @@
 
     <!-- 权限引导 -->
     <string name="permission_title">权限引导</string>
+
+    <!-- 首次启动引导 -->
+    <string name="onboarding_step_language">第一步：选择语言</string>
+    <string name="onboarding_step_language_desc">请选择您偏好的界面语言，之后可随时在设置中修改</string>
+    <string name="onboarding_step_permissions">第二步：授权</string>
+    <string name="onboarding_step_permissions_desc">为保障被控端正常运行，请开启以下系统权限后进入下一步</string>
+    <string name="onboarding_step_server">第三步：服务器地址</string>
+    <string name="onboarding_step_server_desc">设置自建或自定义的 LinkALL 服务器地址，留空则使用默认官方服务器</string>
+    <string name="onboarding_step_login">第四步：登录账号</string>
+    <string name="onboarding_step_login_desc">使用您的 LinkALL 账号登录，登录成功后即可进入主界面</string>
+    <string name="onboarding_server_placeholder">https://example.com/</string>
     <string name="permission_accessibility">无障碍服务</string>
     <string name="permission_accessibility_desc">用于键鼠注入到远端屏幕</string>
     <string name="permission_display_over_other">后台弹出界面</string>

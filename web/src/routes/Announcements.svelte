@@ -39,7 +39,48 @@
   let showPreview = $state(false);
   let saving = $state(false);
 
+  // Markdown 编辑器 textarea 引用（用于工具栏操作选区）
+  let ta = $state<HTMLTextAreaElement | null>(null);
+
   const platforms = ['all', 'windows', 'linux', 'android', 'web'];
+
+  // 包裹选中文本（前后缀），无选中时插入占位
+  function wrap(before: string, after: string, placeholder = '') {
+    if (!ta) return;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const sel = form.contentMd.slice(s, e) || placeholder;
+    const text = before + sel + after;
+    form.contentMd = form.contentMd.slice(0, s) + text + form.contentMd.slice(e);
+    requestAnimationFrame(() => {
+      ta!.focus();
+      ta!.selectionStart = s + before.length;
+      ta!.selectionEnd = s + before.length + sel.length;
+    });
+  }
+
+  // 行首插入前缀（对选中范围内每一行）
+  function linePrefix(prefix: string) {
+    if (!ta) return;
+    const s = ta.selectionStart;
+    const e = ta.selectionEnd;
+    const block = form.contentMd.slice(s, e) || '';
+    const lines = block.split('\n').map((l) => prefix + l);
+    const text = lines.join('\n');
+    form.contentMd = form.contentMd.slice(0, s) + text + form.contentMd.slice(e);
+    requestAnimationFrame(() => ta!.focus());
+  }
+
+  // 在光标处插入文本
+  function insert(text: string) {
+    if (!ta) return;
+    const s = ta.selectionStart;
+    form.contentMd = form.contentMd.slice(0, s) + text + form.contentMd.slice(ta.selectionEnd);
+    requestAnimationFrame(() => {
+      ta!.focus();
+      ta!.selectionStart = ta!.selectionEnd = s + text.length;
+    });
+  }
 
   async function refresh() {
     loading = true;
@@ -197,10 +238,32 @@
             <span class="label">{t('announcements.admin_title')}</span>
             <input type="text" bind:value={form.title} placeholder={t('announcements.admin_title')} />
           </label>
-          <label class="field">
+          <div class="field">
             <span class="label">{t('announcements.admin_content')}</span>
-            <textarea bind:value={form.contentMd} rows="12" placeholder="Markdown..."></textarea>
-          </label>
+            <div class="md-toolbar">
+              <button class="md-tool" title="H1" onclick={() => linePrefix('# ')}>H1</button>
+              <button class="md-tool" title="H2" onclick={() => linePrefix('## ')}>H2</button>
+              <button class="md-tool" title="H3" onclick={() => linePrefix('### ')}>H3</button>
+              <span class="md-sep"></span>
+              <button class="md-tool" title="粗体" onclick={() => wrap('**', '**', '粗体')}><b>B</b></button>
+              <button class="md-tool" title="斜体" onclick={() => wrap('*', '*', '斜体')}><i>I</i></button>
+              <button class="md-tool" title="删除线" onclick={() => wrap('~~', '~~', '删除线')}><s>S</s></button>
+              <button class="md-tool" title="行内代码" onclick={() => wrap('`', '`', 'code')}>code</button>
+              <span class="md-sep"></span>
+              <button class="md-tool" title="链接" onclick={() => wrap('[', '](https://)', '链接文字')}>link</button>
+              <button class="md-tool" title="图片" onclick={() => insert('![图片描述](图片地址)')}>img</button>
+              <span class="md-sep"></span>
+              <button class="md-tool" title="无序列表" onclick={() => linePrefix('- ')}>• 列表</button>
+              <button class="md-tool" title="有序列表" onclick={() => linePrefix('1. ')}>1. 列表</button>
+              <button class="md-tool" title="任务列表" onclick={() => linePrefix('- [ ] ')}>☐ 任务</button>
+              <button class="md-tool" title="引用" onclick={() => linePrefix('> ')}>“ 引用</button>
+              <span class="md-sep"></span>
+              <button class="md-tool" title="代码块" onclick={() => wrap('\n```\n', '\n```\n', '代码')}>{ } 代码块</button>
+              <button class="md-tool" title="分隔线" onclick={() => insert('\n---\n')}>— 分隔</button>
+              <button class="md-tool" title="表格" onclick={() => insert('\n| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n| A | B | C |\n')}>▦ 表格</button>
+            </div>
+            <textarea bind:this={ta} bind:value={form.contentMd} rows="12" placeholder="Markdown..."></textarea>
+          </div>
           <div class="field-row">
             <label class="field">
               <span class="label">{t('announcements.admin_platform')}</span>
@@ -429,6 +492,31 @@
     border-top: 1px solid var(--color-border-soft);
     margin: 10px 0;
   }
+  .ann-content :global(table),
+  .preview :global(table) {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 8px 0;
+    font-size: 12px;
+  }
+  .ann-content :global(th),
+  .ann-content :global(td),
+  .preview :global(th),
+  .preview :global(td) {
+    border: 1px solid var(--color-border-soft);
+    padding: 4px 8px;
+    text-align: left;
+  }
+  .ann-content :global(th),
+  .preview :global(th) {
+    background: var(--color-bg-soft);
+    font-weight: 600;
+  }
+  .ann-content :global(.task-list),
+  .preview :global(.task-list) {
+    list-style: none;
+    padding-left: 4px;
+  }
   .ann-meta {
     font-size: 11px;
     display: flex;
@@ -505,6 +593,37 @@
     font-family: var(--font-mono, monospace);
     resize: vertical;
     min-height: 200px;
+  }
+  /* Markdown 工具栏 */
+  .md-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 4px 6px;
+    background: var(--color-bg-soft);
+    border: 1px solid var(--color-border-soft);
+    border-radius: 4px 4px 0 0;
+    border-bottom: none;
+  }
+  .md-tool {
+    padding: 3px 7px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--color-fg-muted);
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .md-tool:hover {
+    background: var(--color-bg-elev2);
+    color: var(--color-fg);
+    border-color: var(--color-border-soft);
+  }
+  .md-sep {
+    width: 1px;
+    background: var(--color-border-soft);
+    margin: 2px 3px;
   }
   .field-row {
     display: flex;

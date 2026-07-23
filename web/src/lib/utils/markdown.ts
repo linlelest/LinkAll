@@ -126,6 +126,21 @@ export function renderMarkdown(md: string): string {
       inQuote = false;
     }
 
+    // 任务列表 - [ ] / - [x]
+    const taskMatch = line.match(/^[-*+]\s+\[([ xX])\]\s+(.+)$/);
+    if (taskMatch) {
+      if (!inList || listType !== 'ul') {
+        if (inList) html.push(`</${listType}>`);
+        html.push('<ul class="task-list">');
+        inList = true;
+        listType = 'ul';
+      }
+      const checked = taskMatch[1].toLowerCase() === 'x';
+      const checkbox = checked ? '☑' : '☐';
+      html.push(`<li>${checkbox} ${renderInline(escapeHtml(taskMatch[2]))}</li>`);
+      continue;
+    }
+
     // 无序列表 - * +
     const ulMatch = line.match(/^[-*+]\s+(.+)$/);
     if (ulMatch) {
@@ -150,6 +165,41 @@ export function renderMarkdown(md: string): string {
       }
       html.push(`<li>${renderInline(escapeHtml(olMatch[1]))}</li>`);
       continue;
+    }
+
+    // 表格 | col1 | col2 | （下一行 | --- | --- | 为分隔行）
+    const tableMatch = line.match(/^\|(.+)\|$/);
+    if (tableMatch && i + 1 < lines.length) {
+      const nextLine = lines[i + 1].trim();
+      if (nextLine.match(/^\|[\s:|-]+\|$/) && nextLine.includes('-')) {
+        const headers = tableMatch[1].split('|').map((h) => h.trim());
+        i++; // 跳过分隔行
+        const rows: string[][] = [];
+        while (i + 1 < lines.length) {
+          const nextRaw = lines[i + 1].trim();
+          if (!nextRaw.match(/^\|(.+)\|$/)) break;
+          i++;
+          const cells = nextRaw.slice(1, -1).split('|').map((c) => c.trim());
+          rows.push(cells);
+        }
+        if (inList) {
+          html.push(`</${listType}>`);
+          inList = false;
+        }
+        let tbl = '<table><thead><tr>';
+        headers.forEach((h) => (tbl += `<th>${renderInline(escapeHtml(h))}</th>`));
+        tbl += '</tr></thead><tbody>';
+        rows.forEach((row) => {
+          tbl += '<tr>';
+          headers.forEach((_, idx) => {
+            tbl += `<td>${renderInline(escapeHtml(row[idx] || ''))}</td>`;
+          });
+          tbl += '</tr>';
+        });
+        tbl += '</tbody></table>';
+        html.push(tbl);
+        continue;
+      }
     }
 
     // 普通段落

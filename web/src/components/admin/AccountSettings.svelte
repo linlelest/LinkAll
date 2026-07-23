@@ -4,6 +4,7 @@
   import { authStore } from '$lib/stores/auth';
   import { changePassword } from '$lib/api/auth';
   import { generateInvites, listInvites, revokeInvite, exportInvites, type InviteCode } from '$lib/api/invites';
+  import { getSecurity, updateSecurity, type SecuritySettings } from '$lib/api/security';
   import { listAnnouncements, markRead, type Announcement } from '$lib/api/announcements';
   import { ApiError } from '$lib/api/client';
   import { toast } from '$lib/stores/toast';
@@ -41,9 +42,12 @@
   // 邀请码
   let inviteCount = $state(1);
   let inviteTtl = $state(168);
+  let inviteMaxUses = $state(1);
   let inviteNote = $state('');
   let invites = $state<InviteCode[]>([]);
   let genLoading = $state(false);
+  let security = $state<SecuritySettings | null>(null);
+  let toggleLoading = $state(false);
 
   async function loadInvites() {
     try {
@@ -54,10 +58,33 @@
     }
   }
 
+  async function loadSecurity() {
+    try {
+      security = await getSecurity();
+    } catch {
+      // 静默
+    }
+  }
+
+  async function toggleInviteEnabled(v: boolean) {
+    toggleLoading = true;
+    try {
+      await updateSecurity({ inviteEnabled: v });
+      if (security) security = { ...security, inviteEnabled: v };
+      toast.success(v ? t('common.enabled') : t('common.disabled'));
+    } catch (e) {
+      toast.error((e as ApiError).message);
+      // 回滚 UI
+      if (security) security = { ...security, inviteEnabled: !v };
+    } finally {
+      toggleLoading = false;
+    }
+  }
+
   async function generate() {
     genLoading = true;
     try {
-      const res = await generateInvites(inviteCount, inviteTtl, inviteNote);
+      const res = await generateInvites(inviteCount, inviteTtl, inviteNote, inviteMaxUses);
       toast.success(t('invite.generated') + ` (${res.count})`);
       await loadInvites();
     } catch (e) {
@@ -137,6 +164,7 @@
   $effect(() => {
     void loadInvites();
     void loadAnnouncements();
+    if (authStore.isAdmin) void loadSecurity();
   });
 </script>
 
@@ -172,6 +200,18 @@
         <h3 class="section-title">{t('settings.invite_codes')}</h3>
         <button class="btn btn-sm" onclick={exportCsv}>{t('settings.invite_export')}</button>
       </div>
+
+      <!-- 邀请码系统开关 -->
+      {#if security}
+        <div class="toggle-row">
+          <div class="toggle-meta">
+            <div class="toggle-label">{t('settings.invite_system_enabled')}</div>
+            <div class="toggle-hint muted">{t('settings.invite_system_enabled_hint')}</div>
+          </div>
+          <Toggle bind:checked={security.inviteEnabled} disabled={toggleLoading} onChange={toggleInviteEnabled} />
+        </div>
+      {/if}
+
       <div class="form-grid">
         <div>
           <label class="label">{t('settings.invite_count')}</label>
@@ -180,6 +220,11 @@
         <div>
           <label class="label">{t('settings.invite_ttl')}</label>
           <input class="input" type="number" min="1" bind:value={inviteTtl} />
+        </div>
+        <div>
+          <label class="label">{t('settings.invite_max_uses')}</label>
+          <input class="input" type="number" min="0" bind:value={inviteMaxUses} />
+          <div class="hint muted">{t('settings.invite_max_uses_hint')}</div>
         </div>
         <div>
           <label class="label">{t('settings.invite_note')}</label>
@@ -193,10 +238,18 @@
       </div>
 
       <div class="invite-list">
+        <div class="invite-row invite-head">
+          <span>{t('settings.invite_code')}</span>
+          <span>{t('settings.invite_status')}</span>
+          <span>{t('settings.invite_usage')}</span>
+          <span>{t('settings.invite_created_at')}</span>
+          <span></span>
+        </div>
         {#each invites.slice(0, 50) as c (c.id)}
           <div class="invite-row">
             <button class="invite-code mono" onclick={() => copyCode(c.code)}>{c.code} ⧉</button>
             <span class="invite-status" class:used={c.used || c.revoked}>{inviteStatus(c)}</span>
+            <span class="muted mono">{c.usedCount}/{c.maxUses}</span>
             <span class="muted mono">{formatRelative(c.createdAt)}</span>
             <button class="btn btn-sm btn-danger" disabled={c.revoked || c.used} onclick={() => revoke(c.code)}>
               {t('common.revoke')}
@@ -293,13 +346,49 @@
   }
   .invite-row {
     display: grid;
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: 1fr auto auto auto auto;
     gap: 8px;
     align-items: center;
     padding: 6px 8px;
     background: var(--color-bg-soft);
     border-radius: 4px;
     font-size: 12px;
+  }
+  .invite-head {
+    background: transparent;
+    color: var(--color-fg-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 8px;
+  }
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    background: var(--color-bg-soft);
+    border-radius: 6px;
+    gap: 12px;
+  }
+  .toggle-meta {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .toggle-hint {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .hint {
+    font-size: 10px;
+    margin-top: 4px;
+    line-height: 1.4;
   }
   .invite-code {
     background: none;

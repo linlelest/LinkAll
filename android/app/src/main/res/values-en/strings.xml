@@ -99,6 +99,17 @@
 
     <!-- Permissions -->
     <string name="permission_title">Permissions</string>
+
+    <!-- First-launch onboarding -->
+    <string name="onboarding_step_language">Step 1: Choose Language</string>
+    <string name="onboarding_step_language_desc">Select your preferred interface language. You can change it later in settings.</string>
+    <string name="onboarding_step_permissions">Step 2: Grant Permissions</string>
+    <string name="onboarding_step_permissions_desc">For the controlled service to work properly, please grant the following system permissions before proceeding.</string>
+    <string name="onboarding_step_server">Step 3: Server Address</string>
+    <string name="onboarding_step_server_desc">Set a self-hosted or custom LinkALL server address. Leave empty to use the default official server.</string>
+    <string name="onboarding_step_login">Step 4: Sign In</string>
+    <string name="onboarding_step_login_desc">Sign in with your LinkALL account to enter the main interface.</string>
+    <string name="onboarding_server_placeholder">https://example.com/</string>
     <string name="permission_accessibility">Accessibility service</string>
     <string name="permission_accessibility_desc">Inject keyboard/mouse events</string>
     <string name="permission_display_over_other">Display over other apps</string>

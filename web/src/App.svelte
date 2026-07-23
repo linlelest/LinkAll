@@ -6,6 +6,7 @@
   import { setupStore } from '$lib/stores/setup';
   import AppShell from '$components/layout/AppShell.svelte';
   import Toast from '$components/ui/Toast.svelte';
+  import AnnouncementPopup from '$components/AnnouncementPopup.svelte';
   import Setup from '$routes/Setup.svelte';
   import Login from '$routes/Login.svelte';
   import Dashboard from '$routes/Dashboard.svelte';
@@ -78,6 +79,7 @@
 {/if}
 
 <Toast />
+<AnnouncementPopup />
 
 <style>
   .app-boot {

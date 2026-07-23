@@ -3,9 +3,13 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
+import pkg from './package.json' assert { type: 'json' };
 
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   resolve: {
     // 路径别名（与 tsconfig.json paths 对齐）
     alias: {

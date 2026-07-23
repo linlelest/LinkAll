@@ -3,22 +3,26 @@
   import { t } from '$lib/i18n';
   import { routerStore, type RouteName } from '$lib/stores/router';
   import { connectionStore } from '$lib/stores/connection';
+  import { authStore } from '$lib/stores/auth';
 
   let current = $derived(routerStore.current);
+  let isAdmin = $derived(authStore.isAdmin);
 
-  const tabs: { route: RouteName; key: string; icon: string }[] = [
+  // 普通用户隐藏公告 Tab
+  const tabs: { route: RouteName; key: string; icon: string; adminOnly?: boolean }[] = [
     { route: 'dashboard', key: 'nav.dashboard', icon: '▦' },
     { route: 'devices', key: 'nav.devices', icon: '▥' },
     { route: 'control', key: 'nav.control', icon: '◈' },
-    { route: 'announcements', key: 'nav.announcements', icon: '☰' },
+    { route: 'announcements', key: 'nav.announcements', icon: '☰', adminOnly: true },
     { route: 'settings', key: 'nav.settings', icon: '⚙' },
   ];
 
+  let visibleTabs = $derived(tabs.filter((t) => !t.adminOnly || isAdmin));
   let connStatus = $derived(connectionStore.phase === 'connected');
 </script>
 
 <nav class="tabbar">
-  {#each tabs as tab}
+  {#each visibleTabs as tab}
     <button
       class="tab"
       class:active={current === tab.route}

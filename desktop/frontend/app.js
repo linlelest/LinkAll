@@ -1,11 +1,14 @@
 // LinkALL 桌面端应用入口
 // 职责：初始化 i18n、绑定 TabBar 切换、按需激活各 view
+// 首次启动时先走 setup 引导（语言/服务器/登录），完成后才进入主界面。
 // 全局状态保存在 window.__linkall 中，便于跨模块共享
 
 import { initI18n, onLocaleChange } from './lib/i18n.js';
 import { initControlledView } from './views/controlled.js';
 import { initControlView, activateControlView, deactivateControlView } from './views/control.js';
 import { initSettingsView } from './views/settings.js';
+import { startSetup, isSetupDone } from './views/setup.js';
+import { api } from './lib/api.js';
 
 // 全局状态（保持极简，仅记录当前页签）
 const globalState = {
@@ -82,14 +85,37 @@ async function init() {
         // 触发一次重绘确保动态文案更新
     });
 
-    // 绑定 TabBar
+    // 绑定 TabBar（引导覆盖层显示时会被遮挡，但仍可提前绑定）
     bindTabBar();
 
-    // 默认显示被控页（已通过 HTML 默认 active 状态）
-    // 懒加载首屏：直接初始化被控页
+    // 检查引导与登录状态，决定是否进入引导界面
+    const setupDone = isSetupDone();
+    let loggedIn = false;
+    try {
+        loggedIn = await api.getAuthStatus();
+    } catch (e) {
+        // 后端未就绪 / 数据库未初始化时按未登录处理，走引导流程
+        console.warn('获取登录状态失败，按未登录处理:', e);
+    }
+
+    if (!setupDone || !loggedIn) {
+        // 需要引导：首次启动走完整三步；已完成但未登录则直接跳到登录步
+        startSetup({
+            startStep: !setupDone ? 1 : 3,
+            onComplete: enterMainApp,
+        });
+        console.log('LinkALL 桌面端启动：进入引导界面');
+        return;
+    }
+
+    // 已完成引导且已登录，直接进入主界面
+    enterMainApp();
+}
+
+/** 进入主界面：初始化被控页首屏 */
+function enterMainApp() {
     initView('controlled');
     globalState.inited.controlled = true;
-
     console.log('LinkALL 桌面端已启动');
 }
 
