@@ -13,7 +13,6 @@ import kotlinx.serialization.json.Json
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.IceCandidateErrorEvent
-import org.webrtc.IceServer
 import org.webrtc.MediaConstraints
 import org.webrtc.MediaStreamTrack
 import org.webrtc.PeerConnection
@@ -43,8 +42,8 @@ class PeerConnectionManager(
 
     /** STUN/TURN 服务器列表（公共 STUN，生产建议加 TURN） */
     private val iceServers = listOf(
-        IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
-        IceServer.builder("stun:stun1.l.google.com:19302").createIceServer()
+        PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
+        PeerConnection.IceServer.builder("stun:stun1.l.google.com:19302").createIceServer()
     )
 
     private var peerConnection: PeerConnection? = null
@@ -102,7 +101,7 @@ class PeerConnectionManager(
         peerConnection?.addTransceiver(
             MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO,
             RtpTransceiver.RtpTransceiverInit(
-                listOf(RtpTransceiver.RtpTransceiverDirection.SEND_RECV)
+                RtpTransceiver.RtpTransceiverDirection.SEND_RECV
             )
         )
         localVideoTrack = track
@@ -180,7 +179,7 @@ class PeerConnectionManager(
     fun sendEnvelope(env: Envelope): Boolean {
         val dc = dataChannel ?: return false
         val text = json.encodeToString(env)
-        return dc.send(DataChannel.Buffer(text.toByteArray(Charsets.UTF_8).asByteBuffer(), false))
+        return dc.send(DataChannel.Buffer(java.nio.ByteBuffer.wrap(text.toByteArray(Charsets.UTF_8)), false))
     }
 
     /** 发送屏幕配置同步 */

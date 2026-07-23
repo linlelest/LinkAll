@@ -16,6 +16,14 @@
     <string name="nav_ota">检查更新</string>
     <string name="nav_logout">退出登录</string>
 
+    <!-- 仪表盘 -->
+    <string name="dashboard_server_info">服务器信息</string>
+    <string name="dashboard_hostname">主机名</string>
+    <string name="dashboard_online_devices">在线设备</string>
+    <string name="dashboard_active_sessions">活跃会话</string>
+    <string name="dashboard_uptime">运行时长</string>
+    <string name="dashboard_go_version">Go 版本</string>
+
     <!-- 通用 -->
     <string name="common_ok">确定</string>
     <string name="common_cancel">取消</string>

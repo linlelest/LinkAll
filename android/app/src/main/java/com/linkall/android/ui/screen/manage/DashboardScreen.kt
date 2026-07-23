@@ -59,11 +59,11 @@ fun DashboardScreen(
                 Text(stringResource(R.string.dashboard_server_info), style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(8.dp))
                 serverInfo?.let { info ->
-                    InfoRow(stringResource(R.string.dashboard.hostname), info.hostname)
-                    InfoRow(stringResource(R.string.dashboard.online_devices), info.onlineDevices.toString())
-                    InfoRow(stringResource(R.string.dashboard.active_sessions), info.activeSessions.toString())
-                    InfoRow(stringResource(R.string.dashboard.uptime), com.linkall.android.util.Util.formatDuration(info.uptime))
-                    InfoRow(stringResource(R.string.dashboard.go_version), info.goVersion)
+                    InfoRow(stringResource(R.string.dashboard_hostname), info.hostname)
+                    InfoRow(stringResource(R.string.dashboard_online_devices), info.onlineDevices.toString())
+                    InfoRow(stringResource(R.string.dashboard_active_sessions), info.activeSessions.toString())
+                    InfoRow(stringResource(R.string.dashboard_uptime), com.linkall.android.util.Util.formatDuration(info.uptime))
+                    InfoRow(stringResource(R.string.dashboard_go_version), info.goVersion)
                 } ?: run {
                     Text(stringResource(R.string.common_loading), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -112,7 +112,7 @@ private fun MenuCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Card(modifier.padding(vertical = 4.dp), onClick = onClick) {
+    Card(modifier = modifier.padding(vertical = 4.dp), onClick = onClick) {
         Column(
             Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally

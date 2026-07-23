@@ -26,7 +26,7 @@ object I18nHelper {
                 langFromLocale(sys)
             } else LANG_ZH
         }
-        return langFromLocale(locales[0])
+        return langFromLocale(locales[0] ?: java.util.Locale.getDefault())
     }
 
     private fun langFromLocale(locale: Locale): String {

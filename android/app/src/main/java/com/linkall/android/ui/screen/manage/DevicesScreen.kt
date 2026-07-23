@@ -81,7 +81,7 @@ fun DevicesScreen(
                 state.items.isEmpty() && state.error == null ->
                     EmptyView(stringResource(R.string.devices_empty))
                 state.error != null ->
-                    com.linkall.android.ui.components.ErrorView(state.error!!) { vm.devices.refresh(onlineOnly) }
+                    com.linkall.android.ui.components.ErrorView(state.error!!, onRetry = { vm.devices.refresh(onlineOnly) })
                 else -> LazyColumn {
                     items(state.items) { device ->
                         Card(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {

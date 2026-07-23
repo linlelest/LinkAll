@@ -2,6 +2,7 @@ package com.linkall.android.service
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.content.Intent
 import android.graphics.Path
 import android.os.Build
 import android.view.accessibility.AccessibilityEvent

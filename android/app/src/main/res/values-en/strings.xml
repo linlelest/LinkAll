@@ -16,6 +16,14 @@
     <string name="nav_ota">Check Update</string>
     <string name="nav_logout">Logout</string>
 
+    <!-- Dashboard -->
+    <string name="dashboard_server_info">Server info</string>
+    <string name="dashboard_hostname">Hostname</string>
+    <string name="dashboard_online_devices">Online devices</string>
+    <string name="dashboard_active_sessions">Active sessions</string>
+    <string name="dashboard_uptime">Uptime</string>
+    <string name="dashboard_go_version">Go version</string>
+
     <!-- Common -->
     <string name="common_ok">OK</string>
     <string name="common_cancel">Cancel</string>

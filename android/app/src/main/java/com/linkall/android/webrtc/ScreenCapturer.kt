@@ -1,8 +1,8 @@
 package com.linkall.android.webrtc
 
 import android.content.Intent
+import android.media.projection.MediaProjection
 import org.webrtc.ScreenCapturerAndroid
-import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 
 /**
@@ -21,9 +21,11 @@ class ScreenCapturer(
      * ScreenCapturerAndroid 会自动使用传入 Intent 创建 MediaProjection
      */
     fun createCapturer(): VideoCapturer {
-        val c = ScreenCapturerAndroid(resultCode, data) { mediaProjection ->
-            // MediaProjection 权限/停止回调
-        }
+        val c = ScreenCapturerAndroid(data, object : MediaProjection.Callback() {
+            override fun onStop() {
+                // MediaProjection 权限/停止回调
+            }
+        })
         capturer = c
         return c
     }
@@ -32,3 +34,4 @@ class ScreenCapturer(
         capturer = null
     }
 }
+

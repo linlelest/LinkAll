@@ -23,7 +23,7 @@ import retrofit2.http.Query
 
 /**
  * LinkALL 服务端 REST API 接口定义
- * 对接服务端 /api/* 路由
+ * 对接服务端 /api 路由
  */
 interface LinkAllApi {
 
