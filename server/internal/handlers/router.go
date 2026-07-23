@@ -101,7 +101,9 @@ func RegisterRoutes(app *fiber.App, d *Deps) {
 	// 启动后端即自动提供网页前端，无需额外部署静态文件服务器。
 	// /api/* 和 /ws/* 路由已在上面的路由组中注册，Fiber 会优先匹配已注册路由，
 	// 未匹配的路径才会落到此处提供静态文件（SPA 的 index.html 兜底）。
-	app.Static("/", static.FS(), fiber.Static{
+	// root 参数为空字符串：使用 Static.FS 字段提供的嵌入式文件系统而非磁盘路径。
+	app.Static("/", "", fiber.Static{
+		FS:    static.FS(),
 		Index: "index.html",
 	})
 }
