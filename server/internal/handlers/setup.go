@@ -5,6 +5,7 @@ package handlers
 
 import (
 	"database/sql"
+	"log/slog"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -65,14 +66,15 @@ func (d *Deps) InitSetup(c *fiber.Ctx) error {
 
 	// 写入数据库
 	result, err := d.DB.Exec(
-		`INSERT INTO users (username, password_hash, role, status, banned, created_at, last_login_at)
-		 VALUES (?, ?, 'superadmin', 'active', 0, ?, 0)`,
+		`INSERT INTO users (username, password_hash, role, status, banned, created_at)
+		 VALUES (?, ?, 'superadmin', 'active', 0, ?)`,
 		req.Username, hash, time.Now().Unix(),
 	)
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE") || strings.Contains(err.Error(), "unique") {
 			return fail(c, fiber.StatusConflict, CodeInvalidPayload, "用户名已存在")
 		}
+		slog.Error("[setup] 创建管理员失败", "username", req.Username, "err", err.Error())
 		return failInternal(c, "创建管理员失败")
 	}
 	uid, _ := result.LastInsertId()
