@@ -370,7 +370,7 @@ func runServer(flags []string) {
 	hub := webrtc.NewHub(database)
 	iceConfig := &webrtc.ICEConfig{
 		STUNServers:    cfg.STUNServers,
-		TURNServers:    cfg.TURNSServers,
+		TURNServers:    cfg.TURNServers,
 		TURNUsername:   cfg.TURNUsername,
 		TURNCredential: cfg.TURNCredential,
 	}
