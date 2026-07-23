@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 
 	"github.com/linlelest/LinkALL/server/internal/static"
 )
@@ -99,11 +102,21 @@ func RegisterRoutes(app *fiber.App, d *Deps) {
 
 	// --- 网页端静态文件服务（嵌入在二进制中）---
 	// 启动后端即自动提供网页前端，无需额外部署静态文件服务器。
-	// /api/* 和 /ws/* 路由已在上面的路由组中注册，Fiber 会优先匹配已注册路由，
-	// 未匹配的路径才会落到此处提供静态文件（SPA 的 index.html 兜底）。
-	// root 参数为空字符串：使用 Static.FS 字段提供的嵌入式文件系统而非磁盘路径。
-	app.Static("/", "", fiber.Static{
-		FS:    static.FS(),
+	// 使用 fiber/filesystem 中间件 + embed.FS 提供嵌入式静态文件服务。
+	// Next 回调确保 /api/* 和 /ws/* 路由不被拦截，交给已注册的路由处理器处理。
+	app.Use("/", filesystem.New(filesystem.Config{
+		Root: http.FS(static.FS()),
 		Index: "index.html",
-	})
+		Next: func(c *fiber.Ctx) bool {
+			path := c.Path()
+			// /api/* 和 /ws/* 路由跳过静态文件中间件
+			if len(path) >= 4 && path[:4] == "/api" {
+				return true
+			}
+			if len(path) >= 3 && path[:3] == "/ws" {
+				return true
+			}
+			return false
+		},
+	}))
 }
