@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
-	fiberstatic "github.com/gofiber/fiber/v2/middleware/static"
 
 	"linkall/server/internal/static"
 )
@@ -100,17 +99,9 @@ func RegisterRoutes(app *fiber.App, d *Deps) {
 
 	// --- 网页端静态文件服务（嵌入在二进制中）---
 	// 启动后端即自动提供网页前端，无需额外部署静态文件服务器。
-	app.Use("/", fiberstatic.New("", fiberstatic.Config{
-		FS:     static.FS(),
-		Index:  "index.html",
-		Browse: false,
-		Next: func(c *fiber.Ctx) bool {
-			// /api/* 和 /ws/* 路由不被静态文件中间件拦截
-			path := c.Path()
-			if len(path) >= 4 && path[:4] == "/api" || len(path) >= 3 && path[:3] == "/ws" {
-				return true // 跳过静态文件处理，交给后续路由
-			}
-			return false
-		},
-	}))
+	// /api/* 和 /ws/* 路由已在上面的路由组中注册，Fiber 会优先匹配已注册路由，
+	// 未匹配的路径才会落到此处提供静态文件（SPA 的 index.html 兜底）。
+	app.Static("/", static.FS(), fiber.Static{
+		Index: "index.html",
+	})
 }
