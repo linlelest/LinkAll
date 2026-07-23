@@ -90,21 +90,22 @@ impl ControlPeer {
         let pc = Arc::new(api.new_peer_connection(pc_config).await?);
 
         // 3) 视频/音频 recvonly 收发器（控制端只接收）
-        let recv_init = RTCRtpTransceiverInit {
-            direction: RTCRtpTransceiverDirection::Recvonly,
-            ..Default::default()
-        };
+        // webrtc 0.12 的 RTCRtpTransceiverInit 未实现 Default，需显式列出全部字段
+        fn recvonly_init() -> RTCRtpTransceiverInit {
+            RTCRtpTransceiverInit {
+                direction: RTCRtpTransceiverDirection::Recvonly,
+                send_encodings: vec![],
+                send_codecs: vec![],
+                receive_codecs: vec![],
+            }
+        }
         pc.add_transceiver_from_kind(
             webrtc::rtp_transceiver::rtp_codec::RTPCodecType::Video,
-            Some(recv_init),
+            Some(recvonly_init()),
         ).await?;
-        let recv_init = RTCRtpTransceiverInit {
-            direction: RTCRtpTransceiverDirection::Recvonly,
-            ..Default::default()
-        };
         pc.add_transceiver_from_kind(
             webrtc::rtp_transceiver::rtp_codec::RTPCodecType::Audio,
-            Some(recv_init),
+            Some(recvonly_init()),
         ).await?;
 
         // 4) 控制指令 DataChannel（控制端创建，被控端接收）
