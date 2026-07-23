@@ -33,8 +33,8 @@ func HasFrontend() bool {
 		return false
 	}
 	for _, e := range entries {
-		if !e.Is() {
-			return true // 至少存在一个文件
+		if !e.IsDir() {
+			return true // 至少存在一个非目录文件（构建产物）
 		}
 	}
 	return false
