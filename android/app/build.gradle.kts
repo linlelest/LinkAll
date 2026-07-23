@@ -124,8 +124,9 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
-    // WebRTC：优先使用官方坐标，不可用则切换 jitpack 替代坐标
-    implementation("org.webrtc:google-webrtc:1.0.32006")
+    // WebRTC：官方坐标 org.webrtc:google-webrtc 已从 Google Maven 下架，
+    // 改用社区维护的 io.github.webrtc-sdk:android（M2 分支，包名仍为 org.webrtc，API 兼容）
+    implementation("io.github.webrtc-sdk:android:144.7559.09")
 
     // SAF 文件访问已由 AndroidX 原生提供，无需额外依赖
 
